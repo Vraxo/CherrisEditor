@@ -1,0 +1,21 @@
+Fire:
+  - Type: Keyboard
+    KeyOrButton: Space
+  - Type: MouseButton
+    KeyOrButton: Left
+
+MoveLeft:
+  - Type: Keyboard
+    KeyOrButton: A
+
+MoveRight:
+  - Type: Keyboard
+    KeyOrButton: D
+
+MoveUp:
+  - Type: Keyboard
+    KeyOrButton: W
+
+MoveDown:
+  - Type: Keyboard
+    KeyOrButton: S
