@@ -2,9 +2,6 @@
 using IniParser;
 using IniParser.Model;
 using Nodica;
-using System.Collections.Generic;
-using System.Linq;
-using System;
 
 namespace NodicaEditor;
 

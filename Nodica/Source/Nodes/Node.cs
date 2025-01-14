@@ -2,12 +2,6 @@
 
 namespace Nodica;
 
-[AttributeUsage(AttributeTargets.Property)]
-public class InspectorExcludeAttribute : Attribute
-{
-}
-
-
 /// <summary>
 /// Represents a basic node in a scene tree with support for children, activation, and destruction.
 /// </summary>
@@ -22,6 +16,7 @@ public class Node
     public Node? Parent { get; set; } = null;
 
     [InspectorExclude]
+    //[SaveExclude]
     public List<Node> Children { get; set; } = [];
 
     [InspectorExclude]

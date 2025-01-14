@@ -4,20 +4,25 @@ public sealed class ButtonThemePack
 {
     // States
 
+    [InspectorExclude]
     public ButtonTheme Current { get; set; } = new();
 
+    [SaveExclude]
     public ButtonTheme Normal { get; set; } = new();
 
+    [SaveExclude]
     public ButtonTheme Hover { get; set; } = new()
     {
         FillColor = DefaultTheme.HoverFill
     };
 
+    [SaveExclude]
     public ButtonTheme Pressed { get; set; } = new()
     {
         FillColor = DefaultTheme.Accent
     };
 
+    [SaveExclude]
     public ButtonTheme Disabled { get; set; } = new()
     {
         FillColor = DefaultTheme.DisabledFill,
@@ -25,6 +30,7 @@ public sealed class ButtonThemePack
         FontColor = DefaultTheme.DisabledText
     };
 
+    [SaveExclude]
     public ButtonTheme Focused { get; set; } = new()
     {
         BorderColor = DefaultTheme.FocusBorder,
@@ -33,6 +39,8 @@ public sealed class ButtonThemePack
 
     // Setters
 
+    [InspectorExclude]
+    [SaveExclude]
     public float FontSpacing
     {
         set
@@ -45,6 +53,8 @@ public sealed class ButtonThemePack
         }
     }
 
+    [InspectorExclude]
+    [SaveExclude]
     public float FontSize
     {
         set
@@ -57,6 +67,8 @@ public sealed class ButtonThemePack
         }
     }
 
+    [InspectorExclude]
+    [SaveExclude]
     public Font Font
     {
         set
@@ -69,6 +81,8 @@ public sealed class ButtonThemePack
         }
     }
 
+    [InspectorExclude]
+    [SaveExclude]
     public Color FontColor
     {
         set
@@ -81,6 +95,8 @@ public sealed class ButtonThemePack
         }
     }
 
+    [InspectorExclude]
+    [SaveExclude]
     public float Roundness
     {
         set
@@ -94,6 +110,8 @@ public sealed class ButtonThemePack
         }
     }
 
+    [InspectorExclude]
+    [SaveExclude]
     public float BorderLength
     {
         set
@@ -107,6 +125,8 @@ public sealed class ButtonThemePack
         }
     }
 
+    [SaveExclude]
+    [InspectorExclude]
     public Color FillColor
     {
         set
@@ -120,6 +140,8 @@ public sealed class ButtonThemePack
         }
     }
 
+    [InspectorExclude]
+    [SaveExclude]
     public Color BorderColor
     {
         set
@@ -133,6 +155,8 @@ public sealed class ButtonThemePack
         }
     }
 
+    [InspectorExclude]
+    [SaveExclude]
     public float BorderLengthTop
     {
         set
@@ -146,6 +170,8 @@ public sealed class ButtonThemePack
         }
     }
 
+    [InspectorExclude]
+    [SaveExclude]
     public float BorderLengthBottom
     {
         set

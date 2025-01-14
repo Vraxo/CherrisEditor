@@ -6,8 +6,7 @@ public abstract class VisualItem : Node
 {
     public bool Visible { get; set; } = true;
 
-    [InspectorExclude]
-    public bool ReadyForVisibility { get; set; } = false;
+    [InspectorExclude] public bool ReadyForVisibility { get; set; } = false;
 
     private int _layer = 0;
     public int Layer
