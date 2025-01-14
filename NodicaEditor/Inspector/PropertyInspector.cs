@@ -1,8 +1,12 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Collections.Generic;
+using System.Numerics;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using Nodica;
+using Color = Raylib_cs.Color;
 using HorizontalAlignment = System.Windows.HorizontalAlignment;
 using TextBlock = System.Windows.Controls.TextBlock;
 using VerticalAlignment = System.Windows.VerticalAlignment;
@@ -16,30 +20,28 @@ public partial class PropertyInspector : Window
     private static readonly SolidColorBrush BackgroundColor = new(new() { R = 16, G = 16, B = 16, A = 255 });
     private static readonly SolidColorBrush ForegroundColor = new(Colors.LightGray);
     private static readonly SolidColorBrush SeparatorColor = new(Colors.Gray);
-    private readonly Dictionary<string, Expander> expanderMap = new();
+    private readonly Dictionary<string, Expander> _expanderMap = new();
 
     public PropertyInspector(StackPanel inspectorPanel)
     {
         panel = inspectorPanel;
-        expanderMap.Clear();
+        _expanderMap.Clear();
     }
 
     public Dictionary<string, object?> GetPropertyValues(Node node)
     {
-        if (nodePropertyValues.TryGetValue(node, out Dictionary<string, object?>? values))
+        if (nodePropertyValues.TryGetValue(node, out var values))
         {
             return values;
         }
-
         return new Dictionary<string, object?>();
     }
 
     public void DisplayNodeProperties(Node node)
     {
         panel.Children.Clear();
-        expanderMap.Clear();
+        _expanderMap.Clear();
 
-        // Initialize the dictionary for the node if it doesn't exist
         if (!nodePropertyValues.ContainsKey(node))
         {
             nodePropertyValues[node] = new Dictionary<string, object?>();
@@ -49,54 +51,41 @@ public partial class PropertyInspector : Window
 
         foreach (Type currentType in hierarchy)
         {
-            PropertyInfo[] properties = currentType.GetProperties(
-                BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.Instance
-            );
-
+            PropertyInfo[] properties = currentType.GetProperties(BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.Instance);
             if (properties.Length > 0)
             {
-                Expander expander = AddInheritanceSeparator(currentType, node.GetType().Name, currentType.Name, null);
-                expanderMap[expander.Header.ToString()] = expander;
+                Expander expander = AddInheritanceSeparator(currentType, node.GetType().Name, null);
+                _expanderMap[expander.Header.ToString()] = expander;
 
-                foreach (PropertyInfo property in properties)
+                foreach (var property in properties)
                 {
                     if (property.IsDefined(typeof(InspectorExcludeAttribute), false))
-                    {
                         continue;
-                    }
 
                     if (property.PropertyType.IsClass && property.PropertyType != typeof(string))
                     {
-                        object? nestedObject = property.GetValue(node);
+                        var nestedObject = property.GetValue(node);
                         if (nestedObject != null)
                         {
-                            string fullPath = $"{currentType.Name}/{property.Name}";
-                            Expander nestedExpander = AddInheritanceSeparator(
-                                nestedObject.GetType(), currentType.Name, fullPath, expander
-                            );
-                            expanderMap[nestedExpander.Header.ToString()] = nestedExpander;
-                            DisplayNestedProperties(nestedObject, node, fullPath, nestedExpander);
+                            string parentPath = property.Name;
+                            Expander nestedExpander = AddInheritanceSeparator(nestedObject.GetType(), parentPath, expander);
+                            _expanderMap[nestedExpander.Header.ToString()] = nestedExpander;
+                            DisplayNestedProperties(nestedObject, node, parentPath, nestedExpander);
                         }
                     }
                     else
                     {
-                        string propertyName = $"{currentType.Name}/{property.Name}";
+                        string propertyName = property.Name;
 
-                        // Load value from dictionary if it exists, otherwise get it from the node
                         if (!nodePropertyValues[node].ContainsKey(propertyName))
                         {
                             nodePropertyValues[node][propertyName] = property.GetValue(node);
                         }
 
-                        FrameworkElement propertyControl = PropertyControlFactory.CreateControl(
-                            node, property, propertyName, nodePropertyValues[node]
-                        );
-
+                        FrameworkElement propertyControl = PropertyControlFactory.CreateControl(node, property, propertyName, nodePropertyValues[node]);
                         if (propertyControl != null)
                         {
-                            AddPropertyControlToExpander(
-                                node, property, propertyControl, expander, propertyName, nodePropertyValues[node]
-                            );
+                            AddPropertyControlToExpander(node, property, propertyControl, expander, propertyName, nodePropertyValues[node]);
                         }
                     }
                 }
@@ -106,38 +95,31 @@ public partial class PropertyInspector : Window
 
     private List<Type> GetInheritanceHierarchy(Type type)
     {
-        List<Type> hierarchy = new();
+        List<Type> hierarchy = new List<Type>();
         while (type != null && type != typeof(object))
         {
             hierarchy.Add(type);
             type = type.BaseType;
         }
-
         hierarchy.Reverse();
         return hierarchy;
     }
 
-    private void DisplayNestedProperties(object nestedObject, Node node, string parentPath,
-        Expander parentExpander)
+    private void DisplayNestedProperties(object nestedObject, Node node, string parentPath, Expander parentExpander)
     {
         if (nestedObject == null)
-        {
             return;
-        }
 
         Type nestedType = nestedObject.GetType();
         PropertyInfo[] properties = nestedType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
 
-        foreach (PropertyInfo property in properties)
+        foreach (var property in properties)
         {
             if (property.IsDefined(typeof(InspectorExcludeAttribute), false))
-            {
                 continue;
-            }
 
             string fullPath = $"{parentPath}/{property.Name}";
 
-            // Load value from dictionary if it exists, otherwise get it from the nested object
             if (!nodePropertyValues[node].ContainsKey(fullPath))
             {
                 nodePropertyValues[node][fullPath] = property.GetValue(nestedObject);
@@ -145,58 +127,42 @@ public partial class PropertyInspector : Window
 
             if (property.PropertyType.IsClass && property.PropertyType != typeof(string))
             {
-                object? nestedValue = property.GetValue(nestedObject);
+                var nestedValue = property.GetValue(nestedObject);
                 if (nestedValue != null)
                 {
-                    Expander nestedExpander = AddInheritanceSeparator(
-                        nestedValue.GetType(), nestedType.Name, fullPath, parentExpander
-                    );
-                    expanderMap[nestedExpander.Header.ToString()] = nestedExpander;
+                    Expander nestedExpander = AddInheritanceSeparator(nestedValue.GetType(), fullPath, parentExpander);
+                    _expanderMap[nestedExpander.Header.ToString()] = nestedExpander;
                     DisplayNestedProperties(nestedValue, node, fullPath, nestedExpander);
                 }
             }
             else
             {
-                FrameworkElement propertyControl = PropertyControlFactory.CreateControl(
-                    node, property, fullPath, nodePropertyValues[node]
-                );
-
+                FrameworkElement propertyControl = PropertyControlFactory.CreateControl(node, property, fullPath, nodePropertyValues[node]);
                 if (propertyControl != null && parentExpander != null)
                 {
-                    AddPropertyControlToExpander(
-                        node, property, propertyControl, parentExpander, fullPath, nodePropertyValues[node]
-                    );
+                    AddPropertyControlToExpander(node, property, propertyControl, parentExpander, fullPath, nodePropertyValues[node]);
                 }
             }
         }
     }
 
-    private Expander AddInheritanceSeparator(Type type, string nodeTypeName, string fullPath,
-        Expander parentExpander = null)
+    private Expander AddInheritanceSeparator(Type type, string path, Expander parentExpander = null)
     {
-        string expanderKey = $"{nodeTypeName}/{fullPath}";
-        if (expanderMap.ContainsKey(expanderKey))
-        {
-            return expanderMap[expanderKey];
-        }
+        string expanderKey = path.Split('/').Last();
+        if (_expanderMap.ContainsKey(expanderKey))
+            return _expanderMap[expanderKey];
 
-        Expander expander = new()
+        var expander = new Expander
         {
-            Header = fullPath.Split('/').Last(),
+            Header = expanderKey,
             IsExpanded = true,
             BorderBrush = SeparatorColor,
-            BorderThickness = new(0, 1, 0, 1),
-            Margin = new(0, 5, 0, 5), // Default margin for class-level expanders
+            BorderThickness = new Thickness(0, 1, 0, 1),
+            Margin = new Thickness(parentExpander != null ? 20 : 0, 5, 0, 5),
             Foreground = SeparatorColor
         };
 
-        // Indentation for nested expanders
-        if (parentExpander != null)
-        {
-            expander.Margin = new(20, 5, 0, 5); // Indent nested expanders
-        }
-
-        StackPanel contentPanel = new();
+        var contentPanel = new StackPanel();
         expander.Content = contentPanel;
 
         if (parentExpander != null && parentExpander.Content is StackPanel parentContentPanel)
@@ -208,22 +174,19 @@ public partial class PropertyInspector : Window
             panel.Children.Add(expander);
         }
 
-        expanderMap[expanderKey] = expander;
+        _expanderMap[expanderKey] = expander;
         return expander;
     }
 
-    private void AddPropertyControlToExpander(Node node, PropertyInfo property, FrameworkElement propertyControl,
-        Expander expander, string fullPath, Dictionary<string, object?> nodePropertyValues)
+    private void AddPropertyControlToExpander(Node node, PropertyInfo property, FrameworkElement propertyControl, Expander expander, string fullPath, Dictionary<string, object?> nodePropertyValues)
     {
-        StackPanel controlAndResetPanel = new()
+        var controlAndResetPanel = new StackPanel()
         {
             Orientation = Orientation.Horizontal,
             HorizontalAlignment = HorizontalAlignment.Right
         };
         controlAndResetPanel.Children.Add(propertyControl);
-        controlAndResetPanel.Children.Add(
-            PropertyControlFactory.CreateResetButton(node, property, fullPath, nodePropertyValues)
-        );
+        controlAndResetPanel.Children.Add(PropertyControlFactory.CreateResetButton(node, property, fullPath, nodePropertyValues));
 
         TextBlock label = new()
         {
@@ -232,20 +195,20 @@ public partial class PropertyInspector : Window
             TextWrapping = TextWrapping.Wrap,
             Foreground = ForegroundColor,
             VerticalAlignment = VerticalAlignment.Center,
-            Margin = new(0, 0, 5, 0),
+            Margin = new Thickness(0, 0, 5, 0),
             HorizontalAlignment = HorizontalAlignment.Left
         };
 
         Grid propertyGrid = new()
         {
-            Margin = new(5),
+            Margin = new Thickness(5),
             VerticalAlignment = VerticalAlignment.Center,
             HorizontalAlignment = HorizontalAlignment.Stretch,
             ColumnDefinitions =
-        {
-            new() { Width = GridLength.Auto }, // Column for the label (auto-sized)
-            new() { Width = new GridLength(1, GridUnitType.Star) }  // Column for the control (takes up remaining space)
-        }
+            {
+                new ColumnDefinition { Width = GridLength.Auto },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) }
+            }
         };
 
         Grid.SetColumn(label, 0);
@@ -263,6 +226,53 @@ public partial class PropertyInspector : Window
         else
         {
             panel.Children.Add(propertyGrid);
+        }
+    }
+
+    public static object? GetDefaultValue(PropertyInfo property, Node node, string fullPath = "")
+    {
+        try
+        {
+            if (string.IsNullOrEmpty(fullPath))
+            {
+                return property.GetValue(Activator.CreateInstance(node.GetType()));
+            }
+            else
+            {
+                string[] pathParts = fullPath.Split('/');
+                object currentObject = node;
+                PropertyInfo currentProperty = null;
+
+                foreach (var part in pathParts)
+                {
+                    currentProperty = currentObject.GetType().GetProperty(part);
+                    if (currentProperty == null)
+                    {
+                        throw new InvalidOperationException($"Property '{part}' not found in path '{fullPath}'.");
+                    }
+
+                    currentObject = currentProperty.GetValue(currentObject);
+                    if (currentObject == null)
+                    {
+                        return null;
+                    }
+                }
+
+                return currentProperty.GetValue(Activator.CreateInstance(currentObject.GetType()));
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Exception in GetDefaultValue: {ex.Message}");
+            return property.PropertyType switch
+            {
+                Type boolType when boolType == typeof(bool) => false,
+                Type intType when intType == typeof(int) => 0,
+                Type floatType when floatType == typeof(float) => 0f,
+                Type vector2Type when vector2Type == typeof(Vector2) => Vector2.Zero,
+                Type colorType when colorType == typeof(Color) => default(Color),
+                _ => property.PropertyType.IsValueType ? Activator.CreateInstance(property.PropertyType) : null
+            };
         }
     }
 }

@@ -3,17 +3,15 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using IniParser;
-using Microsoft.Win32;
-using Nodica;
 using IniParser.Model;
-using System.Reflection;
+using Microsoft.Win32;
 using System.Numerics;
 using System.Collections.Generic;
 using System.Linq;
-using System.Windows.Media;
-using Raylib_cs;
-using Color = Raylib_cs.Color;
 using System.Text;
+using Nodica;
+using Raylib_cs;
+using System.Reflection;
 
 namespace NodicaEditor;
 
@@ -32,8 +30,7 @@ public partial class MainWindow : Window
         SceneHierarchyTreeView.SelectedItemChanged += SceneHierarchyTreeView_SelectedItemChanged;
         CommandBindings.Add(new CommandBinding(ApplicationCommands.Save, Save_Executed, Save_CanExecute));
 
-        // Automatically load the specified INI file
-        _currentFilePath = @"D:\Parsa Stuff\Visual Studio\HordeRush\HordeRush\Res\Scenes\Gun.ini"; // Replace with your desired path
+        _currentFilePath = @"D:\Parsa Stuff\Visual Studio\HordeRush\HordeRush\Res\Scenes\Gun.ini";
         if (File.Exists(_currentFilePath))
         {
             _sceneHierarchyManager.LoadScene(_currentFilePath);
@@ -77,10 +74,8 @@ public partial class MainWindow : Window
         Node selectedNode = _sceneHierarchyManager.CurrentNode;
         if (selectedNode != null && _currentFilePath != null)
         {
-            // Get property values from the inspector
             Dictionary<string, object?> propertyValues = _propertyInspector.GetPropertyValues(selectedNode);
 
-            // Display the dictionary in a dialog (for debugging)
             StringBuilder sb = new StringBuilder();
             foreach (var kvp in propertyValues)
             {
@@ -88,7 +83,6 @@ public partial class MainWindow : Window
             }
             MessageBox.Show(sb.ToString(), "Properties to be Saved");
 
-            // Save the properties to the INI file
             SaveNodePropertiesToIni(selectedNode, _currentFilePath, propertyValues);
             MessageBox.Show($"Properties for node '{selectedNode.Name}' saved successfully.", "Save Successful", MessageBoxButton.OK, MessageBoxImage.Information);
         }
@@ -98,129 +92,138 @@ public partial class MainWindow : Window
     {
         IniData iniData = _iniParser.ReadFile(filePath);
 
-        // 1. Get the original section name (current node name)
         string originalSectionName = node.Name;
-
-        // 2. Get the new section name (potentially modified node name)
         string newSectionName = propertyValues.ContainsKey("Name")
             ? propertyValues["Name"]?.ToString() ?? originalSectionName
             : originalSectionName;
 
-        // 3. Get the original type (preserve type)
-        string originalType = "";
-        if (iniData.Sections.ContainsSection(originalSectionName) && iniData.Sections[originalSectionName].ContainsKey("type"))
-        {
-            originalType = iniData.Sections[originalSectionName]["type"];
-        }
-
-        // 4. Update Parent References (if name changed)
-        if (originalSectionName != newSectionName)
-        {
-            UpdateParentReferences(iniData, originalSectionName, newSectionName);
-        }
-
-        // 5. Remove the old section if the name has changed
+        // Rename the section if necessary
         if (originalSectionName != newSectionName && iniData.Sections.ContainsSection(originalSectionName))
         {
+            var section = iniData.Sections[originalSectionName];
             iniData.Sections.RemoveSection(originalSectionName);
-        }
-
-        // 6. Get or create the section with the new name
-        KeyDataCollection sectionKeys;
-        if (!iniData.Sections.ContainsSection(newSectionName))
-        {
-            sectionKeys = new KeyDataCollection();
             iniData.Sections.AddSection(newSectionName);
-            iniData.Sections[newSectionName].Merge(sectionKeys);
-        }
-        else
-        {
-            sectionKeys = iniData.Sections[newSectionName];
+
+            foreach (var key in section)
+            {
+                iniData.Sections[newSectionName][key.KeyName] = key.Value;
+            }
         }
 
-        // 7. Preserve the type key - Always ensure 'type' is present and correct
-        sectionKeys["type"] = originalType;
+        UpdateParentReferences(iniData, originalSectionName, newSectionName);
 
-        // 8. Iterate through the property values (including nested properties)
         foreach (var propertyValue in propertyValues)
         {
-            // Remove Prefix:
-            string propertyNameWithoutPrefix = RemovePrefixFromPropertyName(propertyValue.Key);
+            string propertyName = RemovePrefixFromPropertyName(propertyValue.Key);
 
-            if (propertyNameWithoutPrefix == "Name" || propertyNameWithoutPrefix == "type") continue; // Skip Name and type
+            // Skip invalid properties or "Name"
+            if (string.IsNullOrWhiteSpace(propertyName) || propertyName == "Name")
+                continue;
 
-            // Check if the property should be excluded from saving
-            string[] parts = propertyNameWithoutPrefix.Split('/'); // Use the unprefixed name for lookup
-            PropertyInfo? propertyInfo = null;
-            object? targetObject = node;
-            Type? targetType = node.GetType();
-
-            for (int i = 0; i < parts.Length; i++)
+            // Check for nested properties
+            string[] pathParts = propertyValue.Key.Split('/');
+            if (pathParts.Length > 1)
             {
-                if (targetType == null) break;
+                // Handle nested properties
+                object currentObject = node;
+                PropertyInfo currentProperty = null;
+                bool shouldSkip = false;
 
-                propertyInfo = targetType.GetProperty(parts[i]);
-                if (propertyInfo == null) break;
-
-                if (i < parts.Length - 1)
+                for (int i = 0; i < pathParts.Length; i++)
                 {
-                    targetObject = propertyInfo.GetValue(targetObject);
-                    targetType = targetObject?.GetType();
-                }
-            }
+                    currentProperty = currentObject.GetType().GetProperty(pathParts[i]);
+                    if (currentProperty == null)
+                        continue;
 
-            if (propertyInfo != null && !propertyInfo.IsDefined(typeof(SaveExcludeAttribute), false))
-            {
-                // If this is a nested property, ensure we get the correct default value
-                object? defaultValue = targetObject != null ? GetDefaultValueForNestedProperty(propertyInfo, targetObject) : null;
+                    // Skip the exact property if marked with SaveExclude
+                    if (i == pathParts.Length - 1 && IsSaveExcluded(currentProperty))
+                    {
+                        shouldSkip = true;
+                        break;
+                    }
+
+                    // Move to the next level
+                    if (i < pathParts.Length - 1)
+                    {
+                        currentObject = currentProperty.GetValue(currentObject);
+                        if (currentObject == null)
+                            break;
+                    }
+                }
+
+                if (shouldSkip || currentProperty == null)
+                    continue;
+
+                object? defaultValue = DefaultValueProvider.GetDefaultValue(currentProperty, node, propertyValue.Key);
 
                 if (AreValuesEqual(propertyValue.Value, defaultValue))
                 {
-                    // Remove the key if it's the same as the default value
-                    if (sectionKeys.ContainsKey(propertyNameWithoutPrefix))
-                    {
-                        sectionKeys.RemoveKey(propertyNameWithoutPrefix);
-                    }
+                    iniData.Sections[newSectionName].RemoveKey(propertyValue.Key);
                 }
                 else
                 {
-                    string valueString = ConvertPropertyValueToString(propertyValue.Value);
-                    // Update or add the key using the UNPREFIXED name:
-                    sectionKeys[propertyNameWithoutPrefix] = valueString;
+                    iniData.Sections[newSectionName][propertyValue.Key] = ConvertPropertyValueToString(propertyValue.Value);
+                }
+            }
+            else
+            {
+                // Handle non-nested properties
+                PropertyInfo propertyInfo = node.GetType().GetProperty(propertyName);
+                if (propertyInfo == null || IsSaveExcluded(propertyInfo))
+                    continue;
+
+                object? defaultValue = DefaultValueProvider.GetDefaultValue(propertyInfo, node);
+
+                if (AreValuesEqual(propertyValue.Value, defaultValue))
+                {
+                    iniData.Sections[newSectionName].RemoveKey(propertyName);
+                }
+                else
+                {
+                    iniData.Sections[newSectionName][propertyName] = ConvertPropertyValueToString(propertyValue.Value);
                 }
             }
         }
 
-        // 9. Write the modified INI data back to the file
         _iniParser.WriteFile(filePath, iniData);
     }
 
-    // Helper function to remove the prefix
-
-    private static string RemovePrefixFromPropertyName(string propertyName)
+    private static bool IsSaveExcluded(PropertyInfo propertyInfo)
     {
-        string[] parts = propertyName.Split('/');
-        return string.Join("/", parts.Skip(1)); // Skip the first part (e.g., "Node2D")
+        return propertyInfo.GetCustomAttribute<SaveExcludeAttribute>() != null;
     }
 
-    private static object? GetDefaultValueForNestedProperty(PropertyInfo property, object targetObject)
-    {
-        // Get the default value of the property from a new instance of the target object's type
-        return property.GetValue(Activator.CreateInstance(targetObject.GetType()));
-    }
+
 
     private static void UpdateParentReferences(IniData iniData, string oldName, string newName)
     {
         foreach (var section in iniData.Sections)
         {
-            if (section.Keys.ContainsKey("parent"))
+            if (section.Keys.ContainsKey("parent") && section.Keys["parent"] == oldName)
             {
-                if (section.Keys["parent"] == oldName)
-                {
-                    section.Keys["parent"] = newName;
-                }
+                section.Keys["parent"] = newName;
             }
         }
+    }
+
+    private static string RemovePrefixFromPropertyName(string propertyName)
+    {
+        if (string.IsNullOrWhiteSpace(propertyName))
+            throw new ArgumentException("Property name cannot be null or empty.");
+
+        string[] parts = propertyName.Split('/');
+        return parts.Length > 1 ? string.Join("/", parts.Skip(1)) : propertyName;
+    }
+
+    private static string ConvertPropertyValueToString(object? value)
+    {
+        return value switch
+        {
+            Vector2 vector => $"({vector.X},{vector.Y})",
+            bool boolean => boolean ? "true" : "false",
+            Color color => $"({color.R},{color.G},{color.B},{color.A})",
+            _ => value?.ToString() ?? string.Empty
+        };
     }
 
     private static bool AreValuesEqual(object? value1, object? value2)
@@ -241,14 +244,4 @@ public partial class MainWindow : Window
         return value1.Equals(value2);
     }
 
-    private static string ConvertPropertyValueToString(object? value)
-    {
-        return value switch
-        {
-            Vector2 vector => $"({vector.X},{vector.Y})",
-            bool boolean => boolean ? "true" : "false",
-            Color color => $"({color.R},{color.G},{color.B},{color.A})",
-            _ => value?.ToString() ?? string.Empty
-        };
-    }
 }

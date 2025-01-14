@@ -117,9 +117,5 @@ public class SceneHierarchyManager
             CurrentNode = selectedNode;
             _propertyInspector.DisplayNodeProperties(selectedNode);
         }
-        else
-        {
-            CurrentNode = null;
-        }
     }
 }

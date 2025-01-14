@@ -4,7 +4,6 @@ namespace Nodica;
 
 public class Gun : Sprite
 {
-    public Color SexColor { get; set; } = new(25, 32, 37, 1);
     public ButtonThemePack Dollar { get; set; } = new();
 
     private RayCast rayCast = new();
