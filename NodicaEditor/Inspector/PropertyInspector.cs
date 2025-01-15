@@ -1,17 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Nodica;
+using NodicaEditor;
 using System.Numerics;
 using System.Reflection;
-using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using Nodica;
-using Color = Raylib_cs.Color;
+using System.Windows;
 using HorizontalAlignment = System.Windows.HorizontalAlignment;
 using TextBlock = System.Windows.Controls.TextBlock;
 using VerticalAlignment = System.Windows.VerticalAlignment;
-
-namespace NodicaEditor;
+using Button = System.Windows.Controls.Button;
 
 public partial class PropertyInspector : Window
 {
@@ -51,42 +48,39 @@ public partial class PropertyInspector : Window
 
         foreach (Type currentType in hierarchy)
         {
+            Expander expander = AddInheritanceSeparator(currentType, currentType.Name, null);
+            _expanderMap[expander.Header.ToString()] = expander;
+
             PropertyInfo[] properties = currentType.GetProperties(BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.Instance);
-            if (properties.Length > 0)
+            foreach (var property in properties)
             {
-                Expander expander = AddInheritanceSeparator(currentType, node.GetType().Name, null);
-                _expanderMap[expander.Header.ToString()] = expander;
+                if (property.IsDefined(typeof(InspectorExcludeAttribute), false))
+                    continue;
 
-                foreach (var property in properties)
+                if (property.PropertyType.IsClass && property.PropertyType != typeof(string))
                 {
-                    if (property.IsDefined(typeof(InspectorExcludeAttribute), false))
-                        continue;
-
-                    if (property.PropertyType.IsClass && property.PropertyType != typeof(string))
+                    var nestedObject = property.GetValue(node);
+                    if (nestedObject != null)
                     {
-                        var nestedObject = property.GetValue(node);
-                        if (nestedObject != null)
-                        {
-                            string parentPath = property.Name;
-                            Expander nestedExpander = AddInheritanceSeparator(nestedObject.GetType(), parentPath, expander);
-                            _expanderMap[nestedExpander.Header.ToString()] = nestedExpander;
-                            DisplayNestedProperties(nestedObject, node, parentPath, nestedExpander);
-                        }
+                        string parentPath = property.Name;
+                        Expander nestedExpander = AddInheritanceSeparator(nestedObject.GetType(), parentPath, expander);
+                        _expanderMap[nestedExpander.Header.ToString()] = nestedExpander;
+                        DisplayNestedProperties(nestedObject, node, parentPath, nestedExpander);
                     }
-                    else
+                }
+                else
+                {
+                    string propertyName = property.Name;
+
+                    if (!nodePropertyValues[node].ContainsKey(propertyName))
                     {
-                        string propertyName = property.Name;
+                        nodePropertyValues[node][propertyName] = property.GetValue(node);
+                    }
 
-                        if (!nodePropertyValues[node].ContainsKey(propertyName))
-                        {
-                            nodePropertyValues[node][propertyName] = property.GetValue(node);
-                        }
-
-                        FrameworkElement propertyControl = PropertyControlFactory.CreateControl(node, property, propertyName, nodePropertyValues[node]);
-                        if (propertyControl != null)
-                        {
-                            AddPropertyControlToExpander(node, property, propertyControl, expander, propertyName, nodePropertyValues[node]);
-                        }
+                    FrameworkElement propertyControl = PropertyControlFactory.CreateControl(node, property, propertyName, nodePropertyValues[node]);
+                    if (propertyControl != null)
+                    {
+                        AddPropertyControlToExpander(node, property, propertyControl, expander, propertyName, nodePropertyValues[node]);
                     }
                 }
             }
@@ -185,12 +179,16 @@ public partial class PropertyInspector : Window
             Orientation = Orientation.Horizontal,
             HorizontalAlignment = HorizontalAlignment.Right
         };
+
+        // Create and attach the reset button directly here
+        Button resetButton = PropertyControlFactory.CreateResetButton(node, property, fullPath, nodePropertyValues, propertyControl);
+
         controlAndResetPanel.Children.Add(propertyControl);
-        controlAndResetPanel.Children.Add(PropertyControlFactory.CreateResetButton(node, property, fullPath, nodePropertyValues));
+        controlAndResetPanel.Children.Add(resetButton);
 
         TextBlock label = new()
         {
-            Text = property.Name + ":",
+            Text = property.Name,
             MaxWidth = 250,
             TextWrapping = TextWrapping.Wrap,
             Foreground = ForegroundColor,
@@ -206,8 +204,8 @@ public partial class PropertyInspector : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
             ColumnDefinitions =
             {
-                new ColumnDefinition { Width = GridLength.Auto },
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) }
+                new() { Width = GridLength.Auto },
+                new() { Width = new(1, GridUnitType.Star) }
             }
         };
 
@@ -241,12 +239,13 @@ public partial class PropertyInspector : Window
             {
                 string[] pathParts = fullPath.Split('/');
                 object currentObject = node;
-                PropertyInfo currentProperty = null;
+                PropertyInfo? currentProperty = null;
 
                 foreach (var part in pathParts)
                 {
                     currentProperty = currentObject.GetType().GetProperty(part);
-                    if (currentProperty == null)
+
+                    if (currentProperty is null)
                     {
                         throw new InvalidOperationException($"Property '{part}' not found in path '{fullPath}'.");
                     }

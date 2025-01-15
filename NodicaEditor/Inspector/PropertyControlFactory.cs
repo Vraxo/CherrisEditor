@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿using System.Diagnostics;
+using System.Numerics;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
@@ -18,90 +19,69 @@ public static class PropertyControlFactory
     private static readonly SolidColorBrush ForegroundColor = new(Colors.LightGray);
     private static readonly SolidColorBrush SeparatorColor = new(Colors.Gray);
 
-    public static FrameworkElement CreateControl(Node node, PropertyInfo property, string fullPath = "", Dictionary<string, object?> nodePropertyValues = null)
+    public static FrameworkElement? CreateControl(Node node, PropertyInfo property, string fullPath = "", Dictionary<string, object?> nodePropertyValues = null)
     {
-        var propertyType = property.PropertyType;
-
-        if (propertyType == typeof(string))
+        return property.PropertyType switch
         {
-            return StringControlGenerator.CreateStringControl(node, property, fullPath, nodePropertyValues);
-        }
-
-        if (propertyType == typeof(float))
-        {
-            return FloatControlGenerator.CreateFloatControl(node, property, fullPath, nodePropertyValues);
-        }
-
-        if (propertyType == typeof(bool))
-        {
-            return BoolControlGenerator.CreateBoolControl(node, property, fullPath, nodePropertyValues);
-        }
-
-        if (propertyType == typeof(Vector2))
-        {
-            return Vector2ControlGenerator.CreateVector2Control(node, property, fullPath, nodePropertyValues);
-        }
-
-        if (propertyType == typeof(Color))
-        {
-            return ColorControlGenerator.CreateColorControl(node, property, fullPath, nodePropertyValues);
-        }
-
-        if (propertyType.IsEnum)
-        {
-            return EnumControlGenerator.CreateEnumControl(node, property, fullPath, nodePropertyValues);
-        }
-
-        return null;
+            Type t when t == typeof(string) => StringControlGenerator.CreateStringControl(node, property, fullPath, nodePropertyValues),
+            Type t when t == typeof(float) => FloatControlGenerator.CreateFloatControl(node, property, fullPath, nodePropertyValues),
+            Type t when t == typeof(bool) => BoolControlGenerator.CreateBoolControl(node, property, fullPath, nodePropertyValues),
+            Type t when t == typeof(Vector2) => Vector2ControlGenerator.CreateVector2Control(node, property, fullPath, nodePropertyValues),
+            Type t when t == typeof(Color) => ColorControlGenerator.CreateColorControl(node, property, fullPath, nodePropertyValues),
+            Type t when t.IsEnum => EnumControlGenerator.CreateEnumControl(node, property, fullPath, nodePropertyValues),
+            _ => null
+        };
     }
 
-    public static Border CreateSeparatorLine() => new() { Height = 1, Background = SeparatorColor, Margin = new Thickness(0, 5, 0, 5) };
-
-    public static TextBlock CreateTypeLabel(Type type) => new() { Text = type.Name, VerticalAlignment = VerticalAlignment.Center, HorizontalAlignment = HorizontalAlignment.Center, FontWeight = FontWeights.Bold, Margin = new Thickness(0, 5, 0, 5), Foreground = SeparatorColor };
-
-    public static Button CreateResetButton(Node node, PropertyInfo property, string propertyName, Dictionary<string, object?> nodePropertyValues)
+    public static Border CreateSeparatorLine()
     {
-        System.Windows.Controls.Button resetButton = new() { Content = "Reset", Width = 50, Margin = new Thickness(5), Tag = (node, property, propertyName), Background = BackgroundColor, Foreground = ForegroundColor, BorderBrush = BackgroundColor, Style = null };
+        return new()
+        {
+            Height = 1,
+            Background = SeparatorColor,
+            Margin = new(0, 5, 0, 5)
+        };
+    }
+
+    public static TextBlock CreateTypeLabel(Type type)
+    {
+        return new()
+        {
+            Text = type.Name,
+            VerticalAlignment = VerticalAlignment.Center,
+            HorizontalAlignment = HorizontalAlignment.Center,
+            FontWeight = FontWeights.Bold,
+            Margin = new(0, 5, 0, 5),
+            Foreground = SeparatorColor
+        };
+    }
+
+    public static Button CreateResetButton(Node node, PropertyInfo property, string propertyName, Dictionary<string, object?> nodePropertyValues, FrameworkElement propertyControl)
+    {
+        Button resetButton = new()
+        {
+            Content = "Reset",
+            Width = 50,
+            Margin = new Thickness(5),
+            Tag = (node, property, propertyName, propertyControl),
+            Background = BackgroundColor,
+            Foreground = ForegroundColor,
+            BorderBrush = BackgroundColor,
+            Style = null
+        };
+
         resetButton.Click += (sender, e) =>
         {
-            if (sender is System.Windows.Controls.Button button && button.Tag is ValueTuple<Node, PropertyInfo, string> tag)
+            if (sender is Button button && button.Tag is ValueTuple<Node, PropertyInfo, string, FrameworkElement> tag)
             {
-                var (resetNode, resetProperty, resetPropertyName) = tag;
+                var (resetNode, resetProperty, resetPropertyName, associatedControl) = tag;
                 object? defaultValue = DefaultValueProvider.GetDefaultValue(resetProperty, resetNode, resetPropertyName);
-                SetPropertyValue(nodePropertyValues, resetPropertyName, defaultValue); // Update through SetPropertyValue
+                SetPropertyValue(nodePropertyValues, resetPropertyName, defaultValue);
 
-                // Find the control and update its value
-                DependencyObject parent = VisualTreeHelper.GetParent(button);
-                while (parent != null && !(parent is StackPanel))
-                {
-                    parent = VisualTreeHelper.GetParent(parent);
-                }
-
-                if (parent is StackPanel stackPanel)
-                {
-                    foreach (var child in stackPanel.Children)
-                    {
-                        if (child is Grid grid)
-                        {
-                            foreach (var gridChild in grid.Children)
-                            {
-                                if (gridChild is StackPanel controlPanel)
-                                {
-                                    foreach (var panelChild in controlPanel.Children)
-                                    {
-                                        if (panelChild is FrameworkElement fe && fe.Tag is Tuple<Node, PropertyInfo, string> elementTag && elementTag.Item3 == resetPropertyName)
-                                        {
-                                            UpdateControlValue(fe, defaultValue);
-                                            break;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+                UpdateControlValue(associatedControl, defaultValue);
             }
         };
+
         return resetButton;
     }
 
@@ -118,7 +98,6 @@ public static class PropertyControlFactory
             case ComboBox comboBox:
                 comboBox.SelectedItem = value;
                 break;
-                // Add cases for other control types as needed
         }
     }
 

@@ -11,9 +11,9 @@ public class ColorControlGenerator
 {
     private static readonly SolidColorBrush BackgroundBrush = new(new System.Windows.Media.Color { R = 16, G = 16, B = 16, A = 255 });
     private static readonly SolidColorBrush ForegroundBrush = new(Colors.LightGray);
-    private static readonly SolidColorBrush RedBrush = new(Colors.Red);
-    private static readonly SolidColorBrush GreenBrush = new(Colors.Green);
-    private static readonly SolidColorBrush BlueBrush = new(Colors.Blue);
+    private static readonly SolidColorBrush RedBrush = new(new System.Windows.Media.Color { R = 220, G = 20, B = 60, A = 255 });
+    private static readonly SolidColorBrush GreenBrush = new(new System.Windows.Media.Color { R = 50, G = 205, B = 50, A = 255 });
+    private static readonly SolidColorBrush BlueBrush = new(new System.Windows.Media.Color { R = 0, G = 127, B = 255, A = 255 });
 
     private record ColorComponent(string Name, SolidColorBrush Brush);
 
