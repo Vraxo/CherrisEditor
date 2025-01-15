@@ -359,13 +359,16 @@ public partial class MainWindow : Window
             Padding = new Thickness(5)
         };
 
-        // Handle the click event to go back to the parent directory
-        backButton.Click += (sender, e) =>
+        // Use PreviewMouseLeftButtonDown and check for double-click
+        backButton.PreviewMouseLeftButtonDown += (sender, e) =>
         {
-            string parentDirectory = Directory.GetParent(_currentFileExplorerPath)?.FullName;
-            if (parentDirectory != null)
+            if (e.ClickCount == 2)
             {
-                PopulateFileExplorer(parentDirectory);
+                string parentDirectory = Directory.GetParent(_currentFileExplorerPath)?.FullName;
+                if (parentDirectory != null)
+                {
+                    PopulateFileExplorer(parentDirectory);
+                }
             }
         };
 
