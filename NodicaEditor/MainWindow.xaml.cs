@@ -12,6 +12,8 @@ using System.Text;
 using Nodica;
 using Raylib_cs;
 using System.Reflection;
+using System.Windows.Media;
+using Color = Raylib_cs.Color;
 
 namespace NodicaEditor;
 
@@ -245,4 +247,73 @@ public partial class MainWindow : Window
         return value1.Equals(value2);
     }
 
+    private void TextBlock_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        if (e.ClickCount == 2)
+        {
+            var textBlock = sender as TextBlock;
+            var stackPanel = textBlock.Parent as StackPanel;
+            var textBox = stackPanel.Children.OfType<TextBox>().FirstOrDefault();
+
+            VisualStateManager.GoToElementState(stackPanel, "Edit", true);
+            textBox.Focus();
+            textBox.SelectAll();
+
+            e.Handled = true;
+        }
+    }
+
+    private void TextBox_KeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Enter)
+        {
+            var textBox = sender as TextBox;
+            var stackPanel = textBox.Parent as StackPanel;
+            var treeViewItem = FindAncestor<TreeViewItem>(stackPanel);
+
+            if (treeViewItem != null && treeViewItem.Tag is Node node)
+            {
+                _sceneHierarchyManager.RenameNode(node, textBox.Text);
+            }
+
+            VisualStateManager.GoToElementState(stackPanel, "Normal", true);
+            e.Handled = true;
+        }
+        else if (e.Key == Key.Escape)
+        {
+            var textBox = sender as TextBox;
+            var stackPanel = textBox.Parent as StackPanel;
+            VisualStateManager.GoToElementState(stackPanel, "Normal", true);
+            e.Handled = true;
+        }
+    }
+
+    private void TextBox_LostFocus(object sender, RoutedEventArgs e)
+    {
+        var textBox = sender as TextBox;
+        var stackPanel = textBox.Parent as StackPanel;
+        var treeViewItem = FindAncestor<TreeViewItem>(stackPanel);
+
+        if (treeViewItem != null && treeViewItem.Tag is Node node)
+        {
+            _sceneHierarchyManager.RenameNode(node, textBox.Text);
+        }
+
+        VisualStateManager.GoToElementState(stackPanel, "Normal", true);
+    }
+
+    private static T FindAncestor<T>(DependencyObject current) where T : DependencyObject
+    {
+        do
+        {
+            if (current is T ancestor)
+            {
+                return ancestor;
+            }
+            current = VisualTreeHelper.GetParent(current);
+        }
+        while (current != null);
+
+        return null;
+    }
 }
