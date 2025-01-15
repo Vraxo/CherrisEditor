@@ -21,19 +21,23 @@ namespace NodicaEditor;
 
 public partial class MainWindow : Window
 {
+    private SceneHierarchyManager _sceneHierarchyManager;
+    private Inspector _propertyInspector;
     private static readonly FileIniDataParser _iniParser = new();
     private string _currentFilePath;
 
     public MainWindow()
     {
         InitializeComponent();
-
-        SceneHierarchyControl.Initialize(new Inspector(InspectorPanel));
+        _propertyInspector = new Inspector(InspectorPanel);
+        _sceneHierarchyManager = new SceneHierarchyManager(SceneHierarchyTreeView, _propertyInspector);
+        SceneHierarchyTreeView.SelectedItemChanged += SceneHierarchyTreeView_SelectedItemChanged;
+        CommandBindings.Add(new CommandBinding(ApplicationCommands.Save, Save_Executed, Save_CanExecute));
 
         _currentFilePath = @"D:\Parsa Stuff\Visual Studio\HordeRush\HordeRush\Res\Scenes\Gun.ini";
         if (File.Exists(_currentFilePath))
         {
-            SceneHierarchyControl.LoadScene(_currentFilePath);
+            _sceneHierarchyManager.LoadScene(_currentFilePath);
         }
         else
         {
@@ -44,9 +48,6 @@ public partial class MainWindow : Window
         FileExplorerControl.RootPath = @"D:\Parsa Stuff\Visual Studio\HordeRush\HordeRush\Res";
         FileExplorerControl.Populate(FileExplorerControl.RootPath);
         FileExplorerControl.FileOpened += FileExplorerControl_FileOpened;
-
-        // Add CommandBinding to the Window
-        CommandBindings.Add(new CommandBinding(ApplicationCommands.Save, Save_Executed, Save_CanExecute));
     }
 
     private void OpenIniFile_Click(object sender, RoutedEventArgs e)
@@ -60,18 +61,26 @@ public partial class MainWindow : Window
         if (openFileDialog.ShowDialog() == true)
         {
             _currentFilePath = openFileDialog.FileName;
-            SceneHierarchyControl.LoadScene(_currentFilePath);
+            _sceneHierarchyManager.LoadScene(_currentFilePath);
+        }
+    }
+
+    private void SceneHierarchyTreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+    {
+        if (e.NewValue is TreeViewItem selectedItem && selectedItem.Tag is Node selectedNode)
+        {
+            _propertyInspector.DisplayNodeProperties(selectedNode);
         }
     }
 
     private void Save_CanExecute(object sender, CanExecuteRoutedEventArgs e)
     {
-        e.CanExecute = SceneHierarchyControl.CurrentNode != null;
+        e.CanExecute = _sceneHierarchyManager.CurrentNode != null;
     }
 
     private void Save_Executed(object sender, ExecutedRoutedEventArgs e)
     {
-        Node selectedNode = SceneHierarchyControl.CurrentNode;
+        Node selectedNode = _sceneHierarchyManager.CurrentNode;
         if (selectedNode != null && _currentFilePath != null)
         {
             Dictionary<string, object?> propertyValues = _propertyInspector.GetPropertyValues(selectedNode);
@@ -247,7 +256,7 @@ public partial class MainWindow : Window
         if (Path.GetExtension(filePath).Equals(".ini", StringComparison.OrdinalIgnoreCase))
         {
             _currentFilePath = filePath;
-            SceneHierarchyControl.LoadScene(_currentFilePath);
+            _sceneHierarchyManager.LoadScene(_currentFilePath);
         }
         else
         {
