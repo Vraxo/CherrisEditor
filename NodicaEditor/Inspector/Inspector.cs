@@ -57,7 +57,23 @@ public partial class Inspector : Window
                 if (property.IsDefined(typeof(InspectorExcludeAttribute), false))
                     continue;
 
-                if (property.PropertyType.IsClass && property.PropertyType != typeof(string))
+                // Handle resource types (like Texture) directly
+                if (property.PropertyType == typeof(Texture))
+                {
+                    string propertyName = property.Name;
+                    if (!nodePropertyValues[node].ContainsKey(propertyName))
+                    {
+                        nodePropertyValues[node][propertyName] = property.GetValue(node);
+                    }
+
+                    FrameworkElement propertyControl = PropertyControlFactory.CreateControl(node, property, propertyName, nodePropertyValues[node]);
+                    if (propertyControl != null)
+                    {
+                        AddPropertyControlToExpander(node, property, propertyControl, expander, propertyName, nodePropertyValues[node]);
+                    }
+                }
+                // Handle nested objects
+                else if (property.PropertyType.IsClass && property.PropertyType != typeof(string))
                 {
                     var nestedObject = property.GetValue(node);
                     if (nestedObject != null)
@@ -68,10 +84,10 @@ public partial class Inspector : Window
                         DisplayNestedProperties(nestedObject, node, parentPath, nestedExpander);
                     }
                 }
+                // Handle other value types
                 else
                 {
                     string propertyName = property.Name;
-
                     if (!nodePropertyValues[node].ContainsKey(propertyName))
                     {
                         nodePropertyValues[node][propertyName] = property.GetValue(node);
@@ -119,7 +135,17 @@ public partial class Inspector : Window
                 nodePropertyValues[node][fullPath] = property.GetValue(nestedObject);
             }
 
-            if (property.PropertyType.IsClass && property.PropertyType != typeof(string))
+            // Handle resource types (like Texture) within nested objects
+            if (property.PropertyType == typeof(Texture))
+            {
+                FrameworkElement propertyControl = PropertyControlFactory.CreateControl(node, property, fullPath, nodePropertyValues[node]);
+                if (propertyControl != null && parentExpander != null)
+                {
+                    AddPropertyControlToExpander(node, property, propertyControl, parentExpander, fullPath, nodePropertyValues[node]);
+                }
+            }
+            // Handle nested objects recursively
+            else if (property.PropertyType.IsClass && property.PropertyType != typeof(string))
             {
                 var nestedValue = property.GetValue(nestedObject);
                 if (nestedValue != null)
@@ -129,6 +155,7 @@ public partial class Inspector : Window
                     DisplayNestedProperties(nestedValue, node, fullPath, nestedExpander);
                 }
             }
+            // Handle other value types within nested objects
             else
             {
                 FrameworkElement propertyControl = PropertyControlFactory.CreateControl(node, property, fullPath, nodePropertyValues[node]);
@@ -180,23 +207,16 @@ public partial class Inspector : Window
             HorizontalAlignment = HorizontalAlignment.Right
         };
 
-        // Create and attach the reset button directly here
         Button resetButton = PropertyControlFactory.CreateResetButton(node, property, fullPath, nodePropertyValues, propertyControl);
 
         controlAndResetPanel.Children.Add(propertyControl);
         controlAndResetPanel.Children.Add(resetButton);
 
-        // Split CamelCase and PascalCase property names into separate words
-        string[] pathParts = fullPath.Split('/');
-        string labelText = "";
-        for (int i = 0; i < pathParts.Length; i++)
-        {
-            labelText += SplitCamelCase(pathParts[i]);
-            if (i < pathParts.Length - 1)
-            {
-                labelText += "/";
-            }
-        }
+        // Get only the last part of the path for the label
+        string labelText = fullPath.Split('/').Last();
+
+        // If you still want to split CamelCase, you can apply it to labelText
+        labelText = SplitCamelCase(labelText);
 
         TextBlock label = new()
         {

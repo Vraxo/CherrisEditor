@@ -118,7 +118,20 @@ public class ColorControlGenerator
             return;
         }
 
-        byte componentValue = byte.Parse(tb.Text);
+        if (!byte.TryParse(tb.Text, out byte componentValue))
+        {
+            if (!int.TryParse(tb.Text, out int tempValue))
+            {
+                componentValue = 0;
+            }
+            else
+            {
+                componentValue = (byte)Math.Clamp(tempValue, 0, 255);
+            }
+
+            tb.Text = componentValue.ToString();
+        }
+
         Color currentColor = GetColorValue(nodePropertyValues, tag.PropertyName);
         Color updatedColor = UpdateComponentValue(currentColor, tag.ComponentName, componentValue);
 
