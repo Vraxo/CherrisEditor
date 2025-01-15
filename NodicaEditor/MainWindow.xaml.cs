@@ -30,7 +30,7 @@ public partial class MainWindow : Window
         SceneHierarchyTreeView.SelectedItemChanged += SceneHierarchyTreeView_SelectedItemChanged;
         CommandBindings.Add(new CommandBinding(ApplicationCommands.Save, Save_Executed, Save_CanExecute));
 
-        _currentFilePath = @"D:\Parsa Stuff\Visual Studio\HordeRush\HordeRush\Res\Scenes\Menu\Menu.ini";
+        _currentFilePath = @"D:\Parsa Stuff\Visual Studio\HordeRush\HordeRush\Res\Scenes\Gun.ini";
         if (File.Exists(_currentFilePath))
         {
             _sceneHierarchyManager.LoadScene(_currentFilePath);

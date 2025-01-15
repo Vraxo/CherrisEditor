@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿using System.Diagnostics;
+using System.Numerics;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
@@ -18,25 +19,16 @@ public static class PropertyControlFactory
     private static readonly SolidColorBrush ForegroundColor = new(Colors.LightGray);
     private static readonly SolidColorBrush SeparatorColor = new(Colors.Gray);
 
-    public static FrameworkElement? CreateControl(Node node, PropertyInfo property, string fullPath = "",
-        Dictionary<string, object?> nodePropertyValues = null)
+    public static FrameworkElement? CreateControl(Node node, PropertyInfo property, string fullPath = "", Dictionary<string, object?> nodePropertyValues = null)
     {
         return property.PropertyType switch
         {
-            Type t when t == typeof(string) => StringControlGenerator.CreateStringControl(node, property, fullPath,
-                nodePropertyValues),
-            Type t when t == typeof(Texture) => ResourceControlGenerator.CreateResourceControl(node, property,
-                fullPath, nodePropertyValues),
-            Type t when t == typeof(float) => FloatControlGenerator.CreateFloatControl(node, property, fullPath,
-                nodePropertyValues),
-            Type t when t == typeof(bool) => BoolControlGenerator.CreateBoolControl(node, property, fullPath,
-                nodePropertyValues),
-            Type t when t == typeof(Vector2) => Vector2ControlGenerator.CreateVector2Control(node, property, fullPath,
-                nodePropertyValues),
-            Type t when t == typeof(Color) => ColorControlGenerator.CreateColorControl(node, property, fullPath,
-                nodePropertyValues),
-            Type t when t.IsEnum => EnumControlGenerator.CreateEnumControl(node, property, fullPath,
-                nodePropertyValues),
+            Type t when t == typeof(string) => StringControlGenerator.CreateStringControl(node, property, fullPath, nodePropertyValues),
+            Type t when t == typeof(float) => FloatControlGenerator.CreateFloatControl(node, property, fullPath, nodePropertyValues),
+            Type t when t == typeof(bool) => BoolControlGenerator.CreateBoolControl(node, property, fullPath, nodePropertyValues),
+            Type t when t == typeof(Vector2) => Vector2ControlGenerator.CreateVector2Control(node, property, fullPath, nodePropertyValues),
+            Type t when t == typeof(Color) => ColorControlGenerator.CreateColorControl(node, property, fullPath, nodePropertyValues),
+            Type t when t.IsEnum => EnumControlGenerator.CreateEnumControl(node, property, fullPath, nodePropertyValues),
             _ => null
         };
     }
