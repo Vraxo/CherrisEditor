@@ -1,22 +1,22 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Numerics;
-using System.Reflection;
-using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using IniParser;
 using IniParser.Model;
 using Microsoft.Win32;
+using System.Numerics;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using Nodica;
 using Raylib_cs;
-using Color = Raylib_cs.Color;
-using HorizontalAlignment = System.Windows.HorizontalAlignment;
+using System.Reflection;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Controls.Primitives;
+using Button = System.Windows.Controls.Button;
 
 namespace NodicaEditor;
 
@@ -27,6 +27,7 @@ public partial class MainWindow : Window
     private static readonly FileIniDataParser _iniParser = new();
     private string _currentFilePath;
     private string _fileExplorerRootPath;
+    private string _currentFileExplorerPath;
 
     public MainWindow()
     {
@@ -48,7 +49,8 @@ public partial class MainWindow : Window
 
         // Set the root path for the file explorer
         _fileExplorerRootPath = @"D:\Parsa Stuff\Visual Studio\HordeRush\HordeRush\Res";
-        PopulateFileExplorer(_fileExplorerRootPath);
+        _currentFileExplorerPath = _fileExplorerRootPath;
+        PopulateFileExplorer(_currentFileExplorerPath);
     }
 
     private void OpenIniFile_Click(object sender, RoutedEventArgs e)
@@ -229,7 +231,7 @@ public partial class MainWindow : Window
         {
             Vector2 vector => $"({vector.X},{vector.Y})",
             bool boolean => boolean ? "true" : "false",
-            Color color => $"({color.R},{color.G},{color.B},{color.A})",
+            Raylib_cs.Color color => $"({color.R},{color.G},{color.B},{color.A})",
             _ => value?.ToString() ?? string.Empty
         };
     }
@@ -244,7 +246,7 @@ public partial class MainWindow : Window
             return v1.Equals(v2);
         }
 
-        if (value1 is Color c1 && value2 is Color c2)
+        if (value1 is Raylib_cs.Color c1 && value2 is Raylib_cs.Color c2)
         {
             return c1.R == c2.R && c1.G == c2.G && c1.B == c2.B && c1.A == c2.A;
         }
@@ -254,10 +256,18 @@ public partial class MainWindow : Window
 
     private void PopulateFileExplorer(string path)
     {
-        FileExplorerItemsControl.Items.Clear(); // Clear the ItemsControl
+        FileExplorerItemsControl.Items.Clear();
+        _currentFileExplorerPath = path;
 
         try
         {
+            // Add a "Back" button if not in the root directory
+            if (_currentFileExplorerPath != _fileExplorerRootPath)
+            {
+                var backButton = CreateBackButton();
+                FileExplorerItemsControl.Items.Add(backButton);
+            }
+
             // Add directories
             foreach (string dir in Directory.GetDirectories(path))
             {
@@ -272,7 +282,7 @@ public partial class MainWindow : Window
                     }
                 };
 
-                FileExplorerItemsControl.Items.Add(fileItem); // Add to ItemsControl
+                FileExplorerItemsControl.Items.Add(fileItem);
             }
 
             // Add files
@@ -289,7 +299,7 @@ public partial class MainWindow : Window
                     }
                 };
 
-                FileExplorerItemsControl.Items.Add(fileItem); // Add to ItemsControl
+                FileExplorerItemsControl.Items.Add(fileItem);
             }
         }
         catch (Exception ex)
@@ -318,7 +328,7 @@ public partial class MainWindow : Window
                 : new BitmapImage(new Uri($"D:\\Parsa Stuff\\Visual Studio\\NodicaEditor\\NodicaEditor\\bin\\Debug\\net8.0-windows\\Res\\Icons\\File.png", UriKind.RelativeOrAbsolute)),
             Width = 48,
             Height = 48,
-            HorizontalAlignment = HorizontalAlignment.Center
+            HorizontalAlignment = System.Windows.HorizontalAlignment.Center
         };
         Grid.SetRow(image, 0);
         grid.Children.Add(image);
@@ -335,6 +345,31 @@ public partial class MainWindow : Window
         grid.Children.Add(textBlock);
 
         return grid;
+    }
+
+    private Button CreateBackButton()
+    {
+        var backButton = new Button
+        {
+            // Set the content to be the grid created by CreateFileExplorerItem
+            Content = CreateFileExplorerItem("..", true),
+            Tag = "Back",
+            Background = Brushes.Transparent,
+            BorderThickness = new Thickness(0),
+            Padding = new Thickness(5)
+        };
+
+        // Handle the click event to go back to the parent directory
+        backButton.Click += (sender, e) =>
+        {
+            string parentDirectory = Directory.GetParent(_currentFileExplorerPath)?.FullName;
+            if (parentDirectory != null)
+            {
+                PopulateFileExplorer(parentDirectory);
+            }
+        };
+
+        return backButton;
     }
 
     private void OpenFile(string filePath)
