@@ -186,9 +186,21 @@ public partial class PropertyInspector : Window
         controlAndResetPanel.Children.Add(propertyControl);
         controlAndResetPanel.Children.Add(resetButton);
 
+        // Split CamelCase and PascalCase property names into separate words
+        string[] pathParts = fullPath.Split('/');
+        string labelText = "";
+        for (int i = 0; i < pathParts.Length; i++)
+        {
+            labelText += SplitCamelCase(pathParts[i]);
+            if (i < pathParts.Length - 1)
+            {
+                labelText += "/";
+            }
+        }
+
         TextBlock label = new()
         {
-            Text = property.Name,
+            Text = labelText,
             MaxWidth = 250,
             TextWrapping = TextWrapping.Wrap,
             Foreground = ForegroundColor,
@@ -203,10 +215,10 @@ public partial class PropertyInspector : Window
             VerticalAlignment = VerticalAlignment.Center,
             HorizontalAlignment = HorizontalAlignment.Stretch,
             ColumnDefinitions =
-            {
-                new() { Width = GridLength.Auto },
-                new() { Width = new(1, GridUnitType.Star) }
-            }
+        {
+            new() { Width = GridLength.Auto },
+            new() { Width = new(1, GridUnitType.Star) }
+        }
         };
 
         Grid.SetColumn(label, 0);
@@ -225,6 +237,27 @@ public partial class PropertyInspector : Window
         {
             panel.Children.Add(propertyGrid);
         }
+    }
+
+    // Helper function to split CamelCase and PascalCase strings
+    private string SplitCamelCase(string input)
+    {
+        if (string.IsNullOrEmpty(input))
+            return input;
+
+        string result = System.Text.RegularExpressions.Regex.Replace(
+            input,
+            "([a-z])([A-Z])",
+            "$1 $2",
+            System.Text.RegularExpressions.RegexOptions.Compiled);
+
+        result = System.Text.RegularExpressions.Regex.Replace(
+            result,
+            "([A-Z])([A-Z][a-z])",
+            "$1 $2",
+            System.Text.RegularExpressions.RegexOptions.Compiled);
+
+        return result;
     }
 
     public static object? GetDefaultValue(PropertyInfo property, Node node, string fullPath = "")
