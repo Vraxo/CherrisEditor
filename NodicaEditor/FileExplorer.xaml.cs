@@ -18,6 +18,10 @@ public partial class FileExplorer : UserControl
     public FileExplorer()
     {
         InitializeComponent();
+
+        // Initialize with the path you want to start with
+        RootPath = "D:\\Parsa Stuff\\Visual Studio\\HordeRush\\HordeRush\\Res";
+        Populate(RootPath);
     }
 
     public void Populate(string path)
@@ -27,7 +31,7 @@ public partial class FileExplorer : UserControl
 
         try
         {
-            // Add a "Back" button if not in the root directory
+            // Only add a "Back" button if we're not at the root directory
             if (_currentPath != RootPath)
             {
                 var backButton = CreateBackButton();

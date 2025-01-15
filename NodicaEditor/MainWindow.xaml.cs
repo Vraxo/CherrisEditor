@@ -1,115 +1,55 @@
-﻿using System;
-using System.IO;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Input;
-using IniParser;
-using IniParser.Model;
-using Microsoft.Win32;
-using System.Numerics;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.IO;
 using System.Text;
+using System.Windows;
+using System.Windows.Input;
+using Microsoft.Win32;
 using Nodica;
-using Raylib_cs;
-using System.Reflection;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Controls.Primitives;
 
-namespace NodicaEditor;
-
-public partial class MainWindow : Window
+namespace NodicaEditor
 {
-    private SceneHierarchyManager _sceneHierarchyManager;
-    private Inspector _propertyInspector;
-    private string _currentFilePath;
-    private readonly IniSaver _iniSaver;
-
-    public MainWindow()
+    public partial class MainWindow : Window
     {
-        InitializeComponent();
-        _propertyInspector = new Inspector(InspectorPanel);
-        _sceneHierarchyManager = new SceneHierarchyManager(SceneHierarchyTreeView, _propertyInspector);
-        SceneHierarchyTreeView.SelectedItemChanged += SceneHierarchyTreeView_SelectedItemChanged;
-        CommandBindings.Add(new CommandBinding(ApplicationCommands.Save, Save_Executed, Save_CanExecute));
+        private string _currentFilePath;
+        private readonly IniSaver _iniSaver;
 
-        _currentFilePath = @"D:\Parsa Stuff\Visual Studio\HordeRush\HordeRush\Res\Scenes\Gun.ini";
-        if (File.Exists(_currentFilePath))
+        public MainWindow()
         {
-            _sceneHierarchyManager.LoadScene(_currentFilePath);
-        }
-        else
-        {
-            MessageBox.Show($"The file '{_currentFilePath}' does not exist.", "File Not Found", MessageBoxButton.OK, MessageBoxImage.Warning);
-        }
+            InitializeComponent();
 
-        // Set up the File Explorer
-        FileExplorerControl.RootPath = @"D:\Parsa Stuff\Visual Studio\HordeRush\HordeRush\Res";
-        FileExplorerControl.Populate(FileExplorerControl.RootPath);
-        FileExplorerControl.FileOpened += FileExplorerControl_FileOpened;
+            SceneHierarchyControl.NodeSelected += OnNodeSelected;
+            _currentFilePath = @"D:\Parsa Stuff\Visual Studio\HordeRush\HordeRush\Res\Scenes\Gun.ini";
 
-        _iniSaver = new IniSaver();
-    }
-
-    private void OpenIniFile_Click(object sender, RoutedEventArgs e)
-    {
-        OpenFileDialog openFileDialog = new()
-        {
-            Filter = "INI files (*.ini)|*.ini|All files (*.*)|*.*",
-            Title = "Open INI File"
-        };
-
-        if (openFileDialog.ShowDialog() == true)
-        {
-            _currentFilePath = openFileDialog.FileName;
-            _sceneHierarchyManager.LoadScene(_currentFilePath);
-        }
-    }
-
-    private void SceneHierarchyTreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
-    {
-        if (e.NewValue is TreeViewItem selectedItem && selectedItem.Tag is Node selectedNode)
-        {
-            _propertyInspector.DisplayNodeProperties(selectedNode);
-        }
-    }
-
-    private void Save_CanExecute(object sender, CanExecuteRoutedEventArgs e)
-    {
-        e.CanExecute = _sceneHierarchyManager.CurrentNode != null;
-    }
-
-    private void Save_Executed(object sender, ExecutedRoutedEventArgs e)
-    {
-        Node selectedNode = _sceneHierarchyManager.CurrentNode;
-        if (selectedNode != null && _currentFilePath != null)
-        {
-            Dictionary<string, object?> propertyValues = _propertyInspector.GetPropertyValues(selectedNode);
-
-            StringBuilder sb = new StringBuilder();
-            foreach (var kvp in propertyValues)
+            if (File.Exists(_currentFilePath))
             {
-                sb.AppendLine($"{kvp.Key}: {kvp.Value}");
+                SceneHierarchyControl.LoadScene(_currentFilePath);
             }
-            MessageBox.Show(sb.ToString(), "Properties to be Saved");
+            else
+            {
+                MessageBox.Show($"The file '{_currentFilePath}' does not exist.", "File Not Found", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
 
-            _iniSaver.SaveNodePropertiesToIni(selectedNode, _currentFilePath, propertyValues);
-            MessageBox.Show($"Properties for node '{selectedNode.Name}' saved successfully.", "Save Successful", MessageBoxButton.OK, MessageBoxImage.Information);
+            _iniSaver = new IniSaver();
         }
-    }
 
-    private void FileExplorerControl_FileOpened(string filePath)
-    {
-        if (Path.GetExtension(filePath).Equals(".ini", StringComparison.OrdinalIgnoreCase))
+        private void OnNodeSelected(Node selectedNode)
         {
-            _currentFilePath = filePath;
-            _sceneHierarchyManager.LoadScene(_currentFilePath);
+            var propertyInspector = new Inspector(InspectorPanel);
+            propertyInspector.DisplayNodeProperties(selectedNode);
         }
-        else
+
+        private void OpenIniFile_Click(object sender, RoutedEventArgs e)
         {
-            // Handle opening other file types if needed
-            MessageBox.Show($"Opening file: {filePath}", "Open File", MessageBoxButton.OK, MessageBoxImage.Information);
+            OpenFileDialog openFileDialog = new()
+            {
+                Filter = "INI files (*.ini)|*.ini|All files (*.*)|*.*",
+                Title = "Open INI File"
+            };
+
+            if (openFileDialog.ShowDialog() == true)
+            {
+                _currentFilePath = openFileDialog.FileName;
+                SceneHierarchyControl.LoadScene(_currentFilePath);
+            }
         }
     }
 }

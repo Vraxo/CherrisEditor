@@ -1,121 +1,123 @@
-﻿using System.Windows.Controls;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Windows.Controls;
 using IniParser;
 using IniParser.Model;
 using Nodica;
 
-namespace NodicaEditor;
-
-public class SceneHierarchyManager
+namespace NodicaEditor
 {
-    private Dictionary<string, Node> _nodeMap;
-    private TreeView _sceneHierarchyTreeView;
-    private Inspector _propertyInspector;
-    private static readonly FileIniDataParser _iniParser = new();
-    public Node? CurrentNode { get; private set; }
-
-    public SceneHierarchyManager(TreeView treeView, Inspector propertyInspector)
+    public partial class SceneHierarchy : UserControl
     {
-        _sceneHierarchyTreeView = treeView;
-        _propertyInspector = propertyInspector;
-        _nodeMap = new Dictionary<string, Node>();
-        _sceneHierarchyTreeView.SelectedItemChanged += SceneHierarchyTreeView_SelectedItemChanged;
-    }
+        private Dictionary<string, Node> _nodeMap;
+        private static readonly FileIniDataParser _iniParser = new();
+        public Node? CurrentNode { get; private set; }
 
-    public void LoadScene(string filePath)
-    {
-        _nodeMap = ParseIniFile(filePath);
-        BuildTreeView();
-    }
+        public event Action<Node>? NodeSelected;
 
-    public void BuildTreeView()
-    {
-        _sceneHierarchyTreeView.Items.Clear();
-        foreach (var node in _nodeMap.Values)
+        public SceneHierarchy()
         {
-            if (node.Parent == null)
-            {
-                TreeViewItem treeItem = CreateTreeItem(node);
-                _sceneHierarchyTreeView.Items.Add(treeItem);
-            }
-        }
-    }
-
-    private Dictionary<string, Node> ParseIniFile(string filePath)
-    {
-        IniData iniData = _iniParser.ReadFile(filePath);
-        List<Dictionary<string, object>> nodeDataList = ParseIniData(iniData);
-        List<Node> createdNodes = ParseNodeList(nodeDataList);
-        return createdNodes.ToDictionary(node => node.Name, node => node);
-    }
-
-    private List<Dictionary<string, object>> ParseIniData(IniData iniData)
-    {
-        List<Dictionary<string, object>> nodes = new();
-
-        foreach (SectionData section in iniData.Sections)
-        {
-            Dictionary<string, object> nodeData = new();
-            nodeData["name"] = section.SectionName;
-
-            foreach (KeyData keyData in section.Keys)
-            {
-                nodeData[keyData.KeyName] = keyData.Value;
-            }
-            nodes.Add(nodeData);
-        }
-        return nodes;
-    }
-
-    private List<Node> ParseNodeList(List<Dictionary<string, object>> nodes)
-    {
-        List<Node> createdNodes = new();
-        Dictionary<string, Node> namedNodes = new();
-
-        foreach (var element in nodes)
-        {
-            string type = (string)element["type"];
-            string name = (string)element["name"];
-
-            Type nodeType = PackedSceneUtils.ResolveType(type);
-            Node node = (Node)Activator.CreateInstance(nodeType)!;
-            node.Name = name;
-
-            PackedSceneUtils.SetProperties(node, element);
-            namedNodes[name] = node;
-            createdNodes.Add(node);
+            InitializeComponent();
+            _nodeMap = new Dictionary<string, Node>();
         }
 
-        foreach (var element in nodes)
+        public void LoadScene(string filePath)
         {
-            string name = (string)element["name"];
-            string? parentName = element.ContainsKey("parent") ? (string?)element["parent"] : null;
+            _nodeMap = ParseIniFile(filePath);
+            BuildTreeView();
+        }
 
-            if (parentName != null && namedNodes.TryGetValue(parentName, out Node? parent))
+        private void BuildTreeView()
+        {
+            SceneHierarchyTreeView.Items.Clear();
+            foreach (var node in _nodeMap.Values)
             {
-                namedNodes[name].Parent = parent;
-                parent.AddChild(namedNodes[name], name);
+                if (node.Parent == null)
+                {
+                    TreeViewItem treeItem = CreateTreeItem(node);
+                    SceneHierarchyTreeView.Items.Add(treeItem);
+                }
             }
         }
 
-        return createdNodes;
-    }
-
-    private TreeViewItem CreateTreeItem(Node node)
-    {
-        var treeItem = new TreeViewItem { Header = node.Name, Tag = node };
-        foreach (var child in node.Children)
+        private Dictionary<string, Node> ParseIniFile(string filePath)
         {
-            treeItem.Items.Add(CreateTreeItem(child));
+            IniData iniData = _iniParser.ReadFile(filePath);
+            List<Dictionary<string, object>> nodeDataList = ParseIniData(iniData);
+            List<Node> createdNodes = ParseNodeList(nodeDataList);
+            return createdNodes.ToDictionary(node => node.Name, node => node);
         }
-        return treeItem;
-    }
 
-    private void SceneHierarchyTreeView_SelectedItemChanged(object sender, System.Windows.RoutedPropertyChangedEventArgs<object> e)
-    {
-        if (_sceneHierarchyTreeView.SelectedItem is TreeViewItem selectedItem && selectedItem.Tag is Node selectedNode)
+        private List<Dictionary<string, object>> ParseIniData(IniData iniData)
         {
-            CurrentNode = selectedNode;
-            _propertyInspector.DisplayNodeProperties(selectedNode);
+            List<Dictionary<string, object>> nodes = new();
+
+            foreach (SectionData section in iniData.Sections)
+            {
+                Dictionary<string, object> nodeData = new();
+                nodeData["name"] = section.SectionName;
+
+                foreach (KeyData keyData in section.Keys)
+                {
+                    nodeData[keyData.KeyName] = keyData.Value;
+                }
+                nodes.Add(nodeData);
+            }
+            return nodes;
+        }
+
+        private List<Node> ParseNodeList(List<Dictionary<string, object>> nodes)
+        {
+            List<Node> createdNodes = new();
+            Dictionary<string, Node> namedNodes = new();
+
+            foreach (var element in nodes)
+            {
+                string type = (string)element["type"];
+                string name = (string)element["name"];
+
+                Type nodeType = PackedSceneUtils.ResolveType(type);
+                Node node = (Node)Activator.CreateInstance(nodeType)!;
+                node.Name = name;
+
+                PackedSceneUtils.SetProperties(node, element);
+                namedNodes[name] = node;
+                createdNodes.Add(node);
+            }
+
+            foreach (var element in nodes)
+            {
+                string name = (string)element["name"];
+                string? parentName = element.ContainsKey("parent") ? (string?)element["parent"] : null;
+
+                if (parentName != null && namedNodes.TryGetValue(parentName, out Node? parent))
+                {
+                    namedNodes[name].Parent = parent;
+                    parent.AddChild(namedNodes[name], name);
+                }
+            }
+
+            return createdNodes;
+        }
+
+        private TreeViewItem CreateTreeItem(Node node)
+        {
+            var treeItem = new TreeViewItem { Header = node.Name, Tag = node };
+            foreach (var child in node.Children)
+            {
+                treeItem.Items.Add(CreateTreeItem(child));
+            }
+            return treeItem;
+        }
+
+        private void SceneHierarchyTreeView_SelectedItemChanged(object sender, System.Windows.RoutedPropertyChangedEventArgs<object> e)
+        {
+            if (SceneHierarchyTreeView.SelectedItem is TreeViewItem selectedItem && selectedItem.Tag is Node selectedNode)
+            {
+                CurrentNode = selectedNode;
+                NodeSelected?.Invoke(selectedNode);
+            }
         }
     }
 }
