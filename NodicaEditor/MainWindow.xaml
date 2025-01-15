@@ -17,7 +17,6 @@
 
         <Style TargetType="TextBox">
             <Setter Property="Background" Value="#0A0A0A"/>
-            <!-- Near-black background -->
             <Setter Property="Foreground" Value="#D4D4D4"/>
             <Setter Property="BorderBrush" Value="#3C3C3C"/>
             <Setter Property="BorderThickness" Value="1"/>
@@ -62,9 +61,14 @@
                 <ColumnDefinition Width="5" />
                 <ColumnDefinition Width="400" MinWidth="250" />
             </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="5" />
+                <RowDefinition Height="200" MinHeight="100" />
+            </Grid.RowDefinitions>
 
             <!-- Scene Hierarchy (Left Panel) -->
-            <TreeView Name="SceneHierarchyTreeView" Grid.Column="0" Background="#1A1A1A" Foreground="#D4D4D4"
+            <TreeView Name="SceneHierarchyTreeView" Grid.Column="0" Grid.RowSpan="3" Background="#1A1A1A" Foreground="#D4D4D4"
                       SelectedItemChanged="SceneHierarchyTreeView_SelectedItemChanged">
                 <TreeView.ItemContainerStyle>
                     <Style TargetType="TreeViewItem">
@@ -81,18 +85,23 @@
             </TreeView>
 
             <!-- Left Splitter -->
-            <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+            <GridSplitter Grid.Column="1" Grid.RowSpan="3" Width="5" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                           ResizeBehavior="PreviousAndNext" Background="#2A2A2A" />
 
             <!-- Main Content Area -->
-            <Border Grid.Column="2" Background="#1A1A1A" />
+            <Border Grid.Column="2" Grid.Row="0" Grid.RowSpan="2" Background="#1A1A1A" />
+
+            <!-- Bottom Panel -->
+            <Border Grid.Column="2" Grid.Row="2" Background="#1A1A1A" BorderBrush="#3C3C3C" BorderThickness="1">
+                <TextBlock Text="Bottom Panel" Foreground="#D4D4D4" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+            </Border>
 
             <!-- Right Splitter -->
-            <GridSplitter Grid.Column="3" Width="5" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+            <GridSplitter Grid.Column="3" Grid.RowSpan="3" Width="5" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                           ResizeBehavior="PreviousAndNext" Background="#2A2A2A" />
 
             <!-- Inspector Panel (Right Panel) -->
-            <ScrollViewer Grid.Column="4" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+            <ScrollViewer Grid.Column="4" Grid.RowSpan="3" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
                 <StackPanel x:Name="InspectorPanel" Background="#1A1A1A" Margin="10">
                 </StackPanel>
             </ScrollViewer>
