@@ -19,10 +19,11 @@ public class Vector2ControlGenerator
         string propertyName = fullPath != "" ? fullPath : property.Name;
         Vector2 initialValue = GetVector2(nodePropertyValues, propertyName);
 
-        StackPanel vectorPanel = new()
+        var vectorPanel = new StackPanel
         {
             Orientation = Orientation.Horizontal,
-            Margin = new(2)
+            Margin = new(2),
+            Tag = "Vector2Control"
         };
 
         (string Name, string InitialValue)[] components =
@@ -144,5 +145,22 @@ public class Vector2ControlGenerator
     private static void SetVector2(Dictionary<string, object?> propertyValues, string propertyName, Vector2 vector)
     {
         propertyValues[propertyName] = vector;
+    }
+
+    public static void UpdateVector2Control(StackPanel vector2ControlPanel, Vector2? newVector)
+    {
+        if (newVector.HasValue)
+        {
+            Vector2 vector = newVector.Value;
+            float[] componentValues = new float[] { vector.X, vector.Y };
+
+            for (int i = 0; i < vector2ControlPanel.Children.Count; i++)
+            {
+                if (vector2ControlPanel.Children[i] is StackPanel componentPanel && componentPanel.Children[1] is TextBox textBox)
+                {
+                    textBox.Text = componentValues[i].ToString();
+                }
+            }
+        }
     }
 }

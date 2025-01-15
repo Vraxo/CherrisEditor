@@ -9,11 +9,11 @@ public class SceneHierarchyManager
 {
     private Dictionary<string, Node> _nodeMap;
     private TreeView _sceneHierarchyTreeView;
-    private PropertyInspector _propertyInspector;
+    private Inspector _propertyInspector;
     private static readonly FileIniDataParser _iniParser = new();
     public Node? CurrentNode { get; private set; }
 
-    public SceneHierarchyManager(TreeView treeView, PropertyInspector propertyInspector)
+    public SceneHierarchyManager(TreeView treeView, Inspector propertyInspector)
     {
         _sceneHierarchyTreeView = treeView;
         _propertyInspector = propertyInspector;

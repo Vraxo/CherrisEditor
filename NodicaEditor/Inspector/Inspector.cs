@@ -1,6 +1,4 @@
 ﻿using Nodica;
-using NodicaEditor;
-using System.Numerics;
 using System.Reflection;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -10,19 +8,20 @@ using TextBlock = System.Windows.Controls.TextBlock;
 using VerticalAlignment = System.Windows.VerticalAlignment;
 using Button = System.Windows.Controls.Button;
 
-public partial class PropertyInspector : Window
+namespace NodicaEditor;
+
+public partial class Inspector : Window
 {
     private readonly StackPanel panel;
-    private readonly Dictionary<Node, Dictionary<string, object?>> nodePropertyValues = new();
-    private static readonly SolidColorBrush BackgroundColor = new(new() { R = 16, G = 16, B = 16, A = 255 });
+    private readonly Dictionary<Node, Dictionary<string, object?>> nodePropertyValues = [];
     private static readonly SolidColorBrush ForegroundColor = new(Colors.LightGray);
     private static readonly SolidColorBrush SeparatorColor = new(Colors.Gray);
-    private readonly Dictionary<string, Expander> _expanderMap = new();
+    private readonly Dictionary<string, Expander> expanderMap = [];
 
-    public PropertyInspector(StackPanel inspectorPanel)
+    public Inspector(StackPanel inspectorPanel)
     {
         panel = inspectorPanel;
-        _expanderMap.Clear();
+        expanderMap.Clear();
     }
 
     public Dictionary<string, object?> GetPropertyValues(Node node)
@@ -31,13 +30,14 @@ public partial class PropertyInspector : Window
         {
             return values;
         }
-        return new Dictionary<string, object?>();
+
+        return [];
     }
 
     public void DisplayNodeProperties(Node node)
     {
         panel.Children.Clear();
-        _expanderMap.Clear();
+        expanderMap.Clear();
 
         if (!nodePropertyValues.ContainsKey(node))
         {
@@ -49,7 +49,7 @@ public partial class PropertyInspector : Window
         foreach (Type currentType in hierarchy)
         {
             Expander expander = AddInheritanceSeparator(currentType, currentType.Name, null);
-            _expanderMap[expander.Header.ToString()] = expander;
+            expanderMap[expander.Header.ToString()] = expander;
 
             PropertyInfo[] properties = currentType.GetProperties(BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.Instance);
             foreach (var property in properties)
@@ -64,7 +64,7 @@ public partial class PropertyInspector : Window
                     {
                         string parentPath = property.Name;
                         Expander nestedExpander = AddInheritanceSeparator(nestedObject.GetType(), parentPath, expander);
-                        _expanderMap[nestedExpander.Header.ToString()] = nestedExpander;
+                        expanderMap[nestedExpander.Header.ToString()] = nestedExpander;
                         DisplayNestedProperties(nestedObject, node, parentPath, nestedExpander);
                     }
                 }
@@ -87,7 +87,7 @@ public partial class PropertyInspector : Window
         }
     }
 
-    private List<Type> GetInheritanceHierarchy(Type type)
+    private static List<Type> GetInheritanceHierarchy(Type type)
     {
         List<Type> hierarchy = new List<Type>();
         while (type != null && type != typeof(object))
@@ -125,7 +125,7 @@ public partial class PropertyInspector : Window
                 if (nestedValue != null)
                 {
                     Expander nestedExpander = AddInheritanceSeparator(nestedValue.GetType(), fullPath, parentExpander);
-                    _expanderMap[nestedExpander.Header.ToString()] = nestedExpander;
+                    expanderMap[nestedExpander.Header.ToString()] = nestedExpander;
                     DisplayNestedProperties(nestedValue, node, fullPath, nestedExpander);
                 }
             }
@@ -143,8 +143,8 @@ public partial class PropertyInspector : Window
     private Expander AddInheritanceSeparator(Type type, string path, Expander parentExpander = null)
     {
         string expanderKey = path.Split('/').Last();
-        if (_expanderMap.ContainsKey(expanderKey))
-            return _expanderMap[expanderKey];
+        if (expanderMap.ContainsKey(expanderKey))
+            return expanderMap[expanderKey];
 
         var expander = new Expander
         {
@@ -168,7 +168,7 @@ public partial class PropertyInspector : Window
             panel.Children.Add(expander);
         }
 
-        _expanderMap[expanderKey] = expander;
+        expanderMap[expanderKey] = expander;
         return expander;
     }
 
@@ -239,8 +239,7 @@ public partial class PropertyInspector : Window
         }
     }
 
-    // Helper function to split CamelCase and PascalCase strings
-    private string SplitCamelCase(string input)
+    private static string SplitCamelCase(string input)
     {
         if (string.IsNullOrEmpty(input))
             return input;
@@ -258,53 +257,5 @@ public partial class PropertyInspector : Window
             System.Text.RegularExpressions.RegexOptions.Compiled);
 
         return result;
-    }
-
-    public static object? GetDefaultValue(PropertyInfo property, Node node, string fullPath = "")
-    {
-        try
-        {
-            if (string.IsNullOrEmpty(fullPath))
-            {
-                return property.GetValue(Activator.CreateInstance(node.GetType()));
-            }
-            else
-            {
-                string[] pathParts = fullPath.Split('/');
-                object currentObject = node;
-                PropertyInfo? currentProperty = null;
-
-                foreach (var part in pathParts)
-                {
-                    currentProperty = currentObject.GetType().GetProperty(part);
-
-                    if (currentProperty is null)
-                    {
-                        throw new InvalidOperationException($"Property '{part}' not found in path '{fullPath}'.");
-                    }
-
-                    currentObject = currentProperty.GetValue(currentObject);
-                    if (currentObject == null)
-                    {
-                        return null;
-                    }
-                }
-
-                return currentProperty.GetValue(Activator.CreateInstance(currentObject.GetType()));
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Exception in GetDefaultValue: {ex.Message}");
-            return property.PropertyType switch
-            {
-                Type boolType when boolType == typeof(bool) => false,
-                Type intType when intType == typeof(int) => 0,
-                Type floatType when floatType == typeof(float) => 0f,
-                Type vector2Type when vector2Type == typeof(Vector2) => Vector2.Zero,
-                Type colorType when colorType == typeof(Color) => default(Color),
-                _ => property.PropertyType.IsValueType ? Activator.CreateInstance(property.PropertyType) : null
-            };
-        }
     }
 }

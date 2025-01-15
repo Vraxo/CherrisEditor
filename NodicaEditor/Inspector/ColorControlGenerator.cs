@@ -22,18 +22,28 @@ public class ColorControlGenerator
         string propertyName = string.IsNullOrEmpty(fullPath) ? property.Name : fullPath;
         Color initialColor = GetColorValue(nodePropertyValues, propertyName);
 
-        return new()
+        var colorControlPanel = new StackPanel
         {
             Orientation = Orientation.Horizontal,
             Margin = new(2),
-            Children =
-            {
-                CreateColorComponentControl(node, property, propertyName, new("R", RedBrush), nodePropertyValues),
-                CreateColorComponentControl(node, property, propertyName, new("G", GreenBrush), nodePropertyValues),
-                CreateColorComponentControl(node, property, propertyName, new("B", BlueBrush), nodePropertyValues),
-                CreateColorComponentControl(node, property, propertyName, new("A", ForegroundBrush), nodePropertyValues)
-            }
+            Tag = "ColorControl"
         };
+
+        ColorComponent[] components = new ColorComponent[]
+        {
+            new("R", RedBrush),
+            new("G", GreenBrush),
+            new("B", BlueBrush),
+            new("A", ForegroundBrush)
+        };
+
+        foreach (var component in components)
+        {
+            StackPanel componentControl = CreateColorComponentControl(node, property, propertyName, component, nodePropertyValues);
+            colorControlPanel.Children.Add(componentControl);
+        }
+
+        return colorControlPanel;
     }
 
     private static StackPanel CreateColorComponentControl(Node node, PropertyInfo property, string propertyName, ColorComponent component, Dictionary<string, object?> nodePropertyValues)
@@ -130,6 +140,23 @@ public class ColorControlGenerator
     private static void SetPropertyValue(Dictionary<string, object?> propertyValues, string propertyName, object? newValue)
     {
         propertyValues[propertyName] = newValue;
+    }
+
+    public static void UpdateColorControl(StackPanel colorControlPanel, Color? newColor)
+    {
+        if (newColor.HasValue)
+        {
+            Color color = newColor.Value;
+            byte[] componentValues = new byte[] { color.R, color.G, color.B, color.A };
+
+            for (int i = 0; i < colorControlPanel.Children.Count; i++)
+            {
+                if (colorControlPanel.Children[i] is StackPanel componentPanel && componentPanel.Children[1] is TextBox textBox)
+                {
+                    textBox.Text = componentValues[i].ToString();
+                }
+            }
+        }
     }
 
     private record ColorComponentTag(Node Node, PropertyInfo Property, string PropertyName, string ComponentName);

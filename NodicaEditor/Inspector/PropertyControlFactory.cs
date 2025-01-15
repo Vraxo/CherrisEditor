@@ -78,7 +78,26 @@ public static class PropertyControlFactory
                 object? defaultValue = DefaultValueProvider.GetDefaultValue(resetProperty, resetNode, resetPropertyName);
                 SetPropertyValue(nodePropertyValues, resetPropertyName, defaultValue);
 
-                UpdateControlValue(associatedControl, defaultValue);
+                // Update the control based on its type
+                if (associatedControl is StackPanel panel)
+                {
+                    if (panel.Tag is string controlType)
+                    {
+                        switch (controlType)
+                        {
+                            case "ColorControl":
+                                ColorControlGenerator.UpdateColorControl(panel, (Color?)defaultValue);
+                                break;
+                            case "Vector2Control":
+                                Vector2ControlGenerator.UpdateVector2Control(panel, (Vector2?)defaultValue);
+                                break;
+                        }
+                    }
+                }
+                else
+                {
+                    UpdateControlValue(associatedControl, defaultValue);
+                }
             }
         };
 
