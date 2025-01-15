@@ -78,10 +78,7 @@
                           ResizeBehavior="PreviousAndNext" Background="#2A2A2A" />
 
             <!-- Inspector Panel (Right Panel) -->
-            <ScrollViewer Grid.Column="4" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
-                <StackPanel x:Name="InspectorPanel" Background="#1A1A1A" Margin="10">
-                </StackPanel>
-            </ScrollViewer>
+            <local:Inspector x:Name="InspectorControl" Grid.Column="4" />
         </Grid>
     </Grid>
 </Window>
