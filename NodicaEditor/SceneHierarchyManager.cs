@@ -2,7 +2,6 @@
 using IniParser;
 using IniParser.Model;
 using Nodica;
-using System.Windows;
 
 namespace NodicaEditor;
 
@@ -103,7 +102,7 @@ public class SceneHierarchyManager
 
     private TreeViewItem CreateTreeItem(Node node)
     {
-        var treeItem = new TreeViewItem { Header = node, Tag = node };
+        var treeItem = new TreeViewItem { Header = node.Name, Tag = node };
         foreach (var child in node.Children)
         {
             treeItem.Items.Add(CreateTreeItem(child));
@@ -117,41 +116,6 @@ public class SceneHierarchyManager
         {
             CurrentNode = selectedNode;
             _propertyInspector.DisplayNodeProperties(selectedNode);
-        }
-    }
-
-    public void RenameNode(Node node, string newName)
-    {
-        if (node.Name != newName && !_nodeMap.ContainsKey(newName))
-        {
-            string oldName = node.Name;
-            _nodeMap.Remove(node.Name);
-            node.Name = newName;
-            _nodeMap[newName] = node;
-
-            // Update parent references in child nodes
-            foreach (var childNode in node.Children)
-            {
-                if (childNode != null)
-                {
-                    _nodeMap[childNode.Name].Parent = node;
-                }
-            }
-
-            // Update parent's reference to this node
-            if (node.Parent != null)
-            {
-                //node.Parent.RemoveChild(oldName);
-                node.Parent.AddChild(node, newName);
-            }
-
-            // Update the TreeView
-            BuildTreeView();
-            _propertyInspector.DisplayNodeProperties(node);
-        }
-        else if (_nodeMap.ContainsKey(newName))
-        {
-            MessageBox.Show($"A node with the name '{newName}' already exists.", "Duplicate Name", MessageBoxButton.OK, MessageBoxImage.Warning);
         }
     }
 }

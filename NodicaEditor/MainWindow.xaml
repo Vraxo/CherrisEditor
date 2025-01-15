@@ -4,7 +4,6 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:NodicaEditor"
-        xmlns:nodica="clr-namespace:Nodica;assembly=Nodica"
         mc:Ignorable="d"
         Title="MainWindow" Height="720" Width="1280"
         Background="#1A1A1A">
@@ -39,46 +38,6 @@
             <Setter Property="Background" Value="#2A2A2A"/>
             <Setter Property="Foreground" Value="#D4D4D4"/>
         </Style>
-
-        <!-- HierarchicalDataTemplate for TreeView, named as NodeTemplate -->
-        <HierarchicalDataTemplate x:Key="NodeTemplate" DataType="{x:Type nodica:Node}" ItemsSource="{Binding Children}">
-            <StackPanel Orientation="Horizontal">
-                <VisualStateManager.VisualStateGroups>
-                    <VisualStateGroup x:Name="EditStates">
-                        <VisualState x:Name="Normal"/>
-                        <VisualState x:Name="Edit">
-                            <Storyboard>
-                                <ObjectAnimationUsingKeyFrames Storyboard.TargetName="textBlock"
-                                                               Storyboard.TargetProperty="Visibility">
-                                    <DiscreteObjectKeyFrame KeyTime="0" Value="Collapsed"/>
-                                </ObjectAnimationUsingKeyFrames>
-                                <ObjectAnimationUsingKeyFrames Storyboard.TargetName="textBox"
-                                                               Storyboard.TargetProperty="Visibility">
-                                    <DiscreteObjectKeyFrame KeyTime="0" Value="Visible"/>
-                                </ObjectAnimationUsingKeyFrames>
-                            </Storyboard>
-                        </VisualState>
-                    </VisualStateGroup>
-                </VisualStateManager.VisualStateGroups>
-                <!-- Non-editable TextBlock -->
-                <TextBlock x:Name="textBlock" Text="{Binding Name}" MouseLeftButtonDown="TextBlock_MouseLeftButtonDown" />
-                <!-- Editable TextBox -->
-                <TextBox x:Name="textBox" Text="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                         Visibility="Collapsed" KeyDown="TextBox_KeyDown" LostFocus="TextBox_LostFocus"/>
-            </StackPanel>
-        </HierarchicalDataTemplate>
-
-        <Style TargetType="TreeViewItem">
-            <Setter Property="IsExpanded" Value="True"/>
-            <Setter Property="HeaderTemplate">
-                <Setter.Value>
-                    <DataTemplate>
-                        <ContentPresenter Content="{Binding}" />
-                    </DataTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
     </Window.Resources>
 
     <Grid>
@@ -110,8 +69,7 @@
 
             <!-- Scene Hierarchy (Left Panel) -->
             <TreeView Name="SceneHierarchyTreeView" Grid.Column="0" Grid.RowSpan="3" Background="#1A1A1A" Foreground="#D4D4D4"
-                      SelectedItemChanged="SceneHierarchyTreeView_SelectedItemChanged"
-                      ItemTemplate="{StaticResource NodeTemplate}">
+                      SelectedItemChanged="SceneHierarchyTreeView_SelectedItemChanged">
                 <TreeView.ItemContainerStyle>
                     <Style TargetType="TreeViewItem">
                         <Setter Property="Foreground" Value="#D4D4D4"/>
