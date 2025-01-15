@@ -5,51 +5,83 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:NodicaEditor"
         mc:Ignorable="d"
-        Title="MainWindow" Height="720" Width="1280" Background="#1A1A1A">
+        Title="MainWindow" Height="720" Width="1280"
+        Background="#1A1A1A">
 
     <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="400" MinWidth="250" />
-            <ColumnDefinition Width="5" />
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="5" />
-            <ColumnDefinition Width="400" MinWidth="250" />
-        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
 
-        <!-- Scene Hierarchy -->
-        <local:SceneHierarchy x:Name="SceneHierarchyControl" Grid.Column="0" />
+        <!-- Menu Bar -->
+        <Menu Grid.Row="0" Background="#2A2A2A" Foreground="#D4D4D4">
+            <MenuItem Header="_File">
+                <MenuItem Header="_Open INI File..." Click="OpenIniFile_Click"/>
+            </MenuItem>
+        </Menu>
 
-        <!-- Left Splitter -->
-        <GridSplitter Grid.Column="1" Width="5" Background="#2A2A2A" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+        <!-- Main Layout -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="400" MinWidth="250" />
+                <ColumnDefinition Width="5" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="5" />
+                <ColumnDefinition Width="400" MinWidth="250" />
+            </Grid.ColumnDefinitions>
 
-        <!-- Main Content Area -->
-        <Grid Grid.Column="2">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="*" />
-                <RowDefinition Height="5" />
-                <RowDefinition Height="200" MinHeight="100" />
-            </Grid.RowDefinitions>
+            <!-- Scene Hierarchy (Left Panel) -->
+            <TreeView Name="SceneHierarchyTreeView" Grid.Column="0" Background="#1A1A1A" Foreground="#D4D4D4"
+                      SelectedItemChanged="SceneHierarchyTreeView_SelectedItemChanged">
+                <TreeView.ItemContainerStyle>
+                    <Style TargetType="TreeViewItem">
+                        <Setter Property="Foreground" Value="#D4D4D4"/>
+                        <Setter Property="Background" Value="#2A2A2A"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource Self}}" Value="True">
+                                <Setter Property="Background" Value="#322222"/>
+                                <Setter Property="Foreground" Value="#FFFFFF"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TreeView.ItemContainerStyle>
+            </TreeView>
 
-            <!-- Main Content Area -->
-            <Border Grid.Row="0" Background="#1A1A1A" />
+            <!-- Left Splitter -->
+            <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                          ResizeBehavior="PreviousAndNext" Background="#2A2A2A" />
 
-            <!-- GridSplitter for Bottom Panel -->
-            <GridSplitter Grid.Row="1" Height="5" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                          ResizeDirection="Rows" Background="#2A2A2A" />
+            <!-- Main Content Area and Bottom Panel -->
+            <Grid Grid.Column="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="5" />
+                    <RowDefinition Height="200" MinHeight="100" />
+                </Grid.RowDefinitions>
 
-            <!-- Bottom Panel -->
-            <Border Grid.Row="2" Background="#1A1A1A" BorderBrush="#3C3C3C" BorderThickness="1">
-                <local:FileExplorer x:Name="FileExplorerControl" />
-            </Border>
+                <!-- Main Content Area -->
+                <Border Grid.Row="0" Background="#1A1A1A" />
+
+                <!-- GridSplitter for Bottom Panel -->
+                <GridSplitter Grid.Row="1" Height="5" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                              ResizeDirection="Rows" Background="#2A2A2A" />
+
+                <!-- Bottom Panel -->
+                <Border Grid.Row="2" Background="#1A1A1A" BorderBrush="#3C3C3C" BorderThickness="1">
+                    <local:FileExplorer x:Name="FileExplorerControl" />
+                </Border>
+            </Grid>
+
+            <!-- Right Splitter -->
+            <GridSplitter Grid.Column="3" Width="5" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                          ResizeBehavior="PreviousAndNext" Background="#2A2A2A" />
+
+            <!-- Inspector Panel (Right Panel) -->
+            <ScrollViewer Grid.Column="4" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                <StackPanel x:Name="InspectorPanel" Background="#1A1A1A" Margin="10">
+                </StackPanel>
+            </ScrollViewer>
         </Grid>
-
-        <!-- Right Splitter -->
-        <GridSplitter Grid.Column="3" Width="5" Background="#2A2A2A" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
-
-        <!-- Inspector Panel -->
-        <ScrollViewer Grid.Column="4" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
-            <StackPanel x:Name="InspectorPanel" Background="#1A1A1A" Margin="10">
-            </StackPanel>
-        </ScrollViewer>
     </Grid>
 </Window>
