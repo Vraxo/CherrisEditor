@@ -69,15 +69,7 @@
 
                 <!-- Bottom Panel -->
                 <Border Grid.Row="2" Background="#1A1A1A" BorderBrush="#3C3C3C" BorderThickness="1">
-                    <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
-                        <ItemsControl x:Name="FileExplorerItemsControl">
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <WrapPanel />
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-                        </ItemsControl>
-                    </ScrollViewer>
+                    <local:FileExplorer x:Name="FileExplorerControl" />
                 </Border>
             </Grid>
 

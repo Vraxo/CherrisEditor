@@ -16,7 +16,6 @@ using System.Reflection;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Controls.Primitives;
-using Button = System.Windows.Controls.Button;
 
 namespace NodicaEditor;
 
@@ -26,8 +25,6 @@ public partial class MainWindow : Window
     private Inspector _propertyInspector;
     private static readonly FileIniDataParser _iniParser = new();
     private string _currentFilePath;
-    private string _fileExplorerRootPath;
-    private string _currentFileExplorerPath;
 
     public MainWindow()
     {
@@ -47,10 +44,10 @@ public partial class MainWindow : Window
             MessageBox.Show($"The file '{_currentFilePath}' does not exist.", "File Not Found", MessageBoxButton.OK, MessageBoxImage.Warning);
         }
 
-        // Set the root path for the file explorer
-        _fileExplorerRootPath = @"D:\Parsa Stuff\Visual Studio\HordeRush\HordeRush\Res";
-        _currentFileExplorerPath = _fileExplorerRootPath;
-        PopulateFileExplorer(_currentFileExplorerPath);
+        // Set up the File Explorer
+        FileExplorerControl.RootPath = @"D:\Parsa Stuff\Visual Studio\HordeRush\HordeRush\Res";
+        FileExplorerControl.Populate(FileExplorerControl.RootPath);
+        FileExplorerControl.FileOpened += FileExplorerControl_FileOpened;
     }
 
     private void OpenIniFile_Click(object sender, RoutedEventArgs e)
@@ -254,128 +251,7 @@ public partial class MainWindow : Window
         return value1.Equals(value2);
     }
 
-    private void PopulateFileExplorer(string path)
-    {
-        FileExplorerItemsControl.Items.Clear();
-        _currentFileExplorerPath = path;
-
-        try
-        {
-            // Add a "Back" button if not in the root directory
-            if (_currentFileExplorerPath != _fileExplorerRootPath)
-            {
-                var backButton = CreateBackButton();
-                FileExplorerItemsControl.Items.Add(backButton);
-            }
-
-            // Add directories
-            foreach (string dir in Directory.GetDirectories(path))
-            {
-                string dirName = Path.GetFileName(dir);
-                var fileItem = CreateFileExplorerItem(dirName, true);
-                fileItem.Tag = dir;
-                fileItem.PreviewMouseLeftButtonDown += (sender, e) =>
-                {
-                    if (e.ClickCount == 2) // Double-click
-                    {
-                        PopulateFileExplorer(fileItem.Tag.ToString());
-                    }
-                };
-
-                FileExplorerItemsControl.Items.Add(fileItem);
-            }
-
-            // Add files
-            foreach (string file in Directory.GetFiles(path))
-            {
-                string fileName = Path.GetFileName(file);
-                var fileItem = CreateFileExplorerItem(fileName, false);
-                fileItem.Tag = file;
-                fileItem.PreviewMouseLeftButtonDown += (sender, e) =>
-                {
-                    if (e.ClickCount == 2) // Double-click
-                    {
-                        OpenFile(fileItem.Tag.ToString());
-                    }
-                };
-
-                FileExplorerItemsControl.Items.Add(fileItem);
-            }
-        }
-        catch (Exception ex)
-        {
-            MessageBox.Show($"Error accessing path '{path}': {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-        }
-    }
-
-    private Grid CreateFileExplorerItem(string name, bool isDirectory)
-    {
-        // Create the main container grid
-        var grid = new Grid
-        {
-            Width = 64,
-            Height = 64,
-            Margin = new Thickness(5)
-        };
-        grid.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(48) });
-        grid.RowDefinitions.Add(new RowDefinition() { Height = GridLength.Auto });
-
-        // Image (icon)
-        var image = new System.Windows.Controls.Image
-        {
-            Source = isDirectory
-                ? new BitmapImage(new Uri($"D:\\Parsa Stuff\\Visual Studio\\NodicaEditor\\NodicaEditor\\bin\\Debug\\net8.0-windows\\Res\\Icons\\Folder.png", UriKind.RelativeOrAbsolute))
-                : new BitmapImage(new Uri($"D:\\Parsa Stuff\\Visual Studio\\NodicaEditor\\NodicaEditor\\bin\\Debug\\net8.0-windows\\Res\\Icons\\File.png", UriKind.RelativeOrAbsolute)),
-            Width = 48,
-            Height = 48,
-            HorizontalAlignment = System.Windows.HorizontalAlignment.Center
-        };
-        Grid.SetRow(image, 0);
-        grid.Children.Add(image);
-
-        // TextBlock (name)
-        var textBlock = new TextBlock
-        {
-            Text = name,
-            TextAlignment = TextAlignment.Center,
-            Foreground = Brushes.White,
-            TextWrapping = TextWrapping.Wrap
-        };
-        Grid.SetRow(textBlock, 1);
-        grid.Children.Add(textBlock);
-
-        return grid;
-    }
-
-    private Button CreateBackButton()
-    {
-        var backButton = new Button
-        {
-            // Set the content to be the grid created by CreateFileExplorerItem
-            Content = CreateFileExplorerItem("..", true),
-            Tag = "Back",
-            Background = Brushes.Transparent,
-            BorderThickness = new Thickness(0),
-            Padding = new Thickness(5)
-        };
-
-        // Use PreviewMouseLeftButtonDown and check for double-click
-        backButton.PreviewMouseLeftButtonDown += (sender, e) =>
-        {
-            if (e.ClickCount == 2)
-            {
-                string parentDirectory = Directory.GetParent(_currentFileExplorerPath)?.FullName;
-                if (parentDirectory != null)
-                {
-                    PopulateFileExplorer(parentDirectory);
-                }
-            }
-        };
-
-        return backButton;
-    }
-
-    private void OpenFile(string filePath)
+    private void FileExplorerControl_FileOpened(string filePath)
     {
         if (Path.GetExtension(filePath).Equals(".ini", StringComparison.OrdinalIgnoreCase))
         {
