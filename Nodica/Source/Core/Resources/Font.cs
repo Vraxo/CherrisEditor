@@ -51,8 +51,8 @@ public class Font
                 codepoints[i] = 32 + i;
             }
 
-            raylibFont = Raylib.LoadFontEx(filePath, size, codepoints, codepoints.Length);
-            Raylib.SetTextureFilter(raylibFont.Texture, TextureFilter.Bilinear);
+            //raylibFont = Raylib.LoadFontEx(filePath, size, codepoints, codepoints.Length);
+            //Raylib.SetTextureFilter(raylibFont.Texture, TextureFilter.Bilinear);
         }
         else if (IsSdl2Backend)
         {

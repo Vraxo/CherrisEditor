@@ -6,26 +6,27 @@ public static class PropertyLoader
 {
     public static T Load<T>(string filePath) where T : new()
     {
-        T stylePack = new();
-        string[] fileLines = File.ReadAllLines(filePath);
+        //T stylePack = new();
+        //string[] fileLines = File.ReadAllLines(filePath);
+        //
+        //foreach (string line in fileLines)
+        //{
+        //    string trimmedLine = line.Trim();
+        //    
+        //    if (string.IsNullOrEmpty(trimmedLine) || !trimmedLine.Contains('='))
+        //    {
+        //        continue;
+        //    }
+        //
+        //    int equalsIndex = trimmedLine.IndexOf("=");
+        //    string propertyPath = trimmedLine.Substring(0, equalsIndex).Trim();
+        //    string value = trimmedLine.Substring(equalsIndex + 1).Trim();
+        //
+        //    SetPropertyValue(stylePack, propertyPath, value);
+        //}
 
-        foreach (string line in fileLines)
-        {
-            string trimmedLine = line.Trim();
-            
-            if (string.IsNullOrEmpty(trimmedLine) || !trimmedLine.Contains('='))
-            {
-                continue;
-            }
-
-            int equalsIndex = trimmedLine.IndexOf("=");
-            string propertyPath = trimmedLine.Substring(0, equalsIndex).Trim();
-            string value = trimmedLine.Substring(equalsIndex + 1).Trim();
-
-            SetPropertyValue(stylePack, propertyPath, value);
-        }
-
-        return stylePack;
+        //return stylePack;
+        return default;
     }
 
     private static void SetPropertyValue(object obj, string propertyPath, string value)

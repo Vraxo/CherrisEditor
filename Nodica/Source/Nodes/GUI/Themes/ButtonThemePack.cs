@@ -4,6 +4,8 @@ public sealed class ButtonThemePack
 {
     // States
 
+    public float SexValue { get; set; } = 10;
+
     [InspectorExclude]
     public ButtonTheme Current { get; set; } = new();
 
