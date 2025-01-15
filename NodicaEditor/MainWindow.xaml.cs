@@ -22,13 +22,15 @@ namespace NodicaEditor;
 public partial class MainWindow : Window
 {
     private SceneHierarchyManager _sceneHierarchyManager;
+    private Inspector _propertyInspector;
     private static readonly FileIniDataParser _iniParser = new();
     private string _currentFilePath;
 
     public MainWindow()
     {
         InitializeComponent();
-        _sceneHierarchyManager = new SceneHierarchyManager(SceneHierarchyTreeView, InspectorControl);
+        _propertyInspector = new Inspector(InspectorPanel);
+        _sceneHierarchyManager = new SceneHierarchyManager(SceneHierarchyTreeView, _propertyInspector);
         SceneHierarchyTreeView.SelectedItemChanged += SceneHierarchyTreeView_SelectedItemChanged;
         CommandBindings.Add(new CommandBinding(ApplicationCommands.Save, Save_Executed, Save_CanExecute));
 
@@ -67,7 +69,7 @@ public partial class MainWindow : Window
     {
         if (e.NewValue is TreeViewItem selectedItem && selectedItem.Tag is Node selectedNode)
         {
-            InspectorControl.DisplayNodeProperties(selectedNode);
+            _propertyInspector.DisplayNodeProperties(selectedNode);
         }
     }
 
@@ -81,7 +83,7 @@ public partial class MainWindow : Window
         Node selectedNode = _sceneHierarchyManager.CurrentNode;
         if (selectedNode != null && _currentFilePath != null)
         {
-            Dictionary<string, object?> propertyValues = InspectorControl.GetPropertyValues(selectedNode);
+            Dictionary<string, object?> propertyValues = _propertyInspector.GetPropertyValues(selectedNode);
 
             StringBuilder sb = new StringBuilder();
             foreach (var kvp in propertyValues)
