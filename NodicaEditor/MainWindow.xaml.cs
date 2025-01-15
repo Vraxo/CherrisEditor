@@ -1,17 +1,22 @@
-﻿using System.IO;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Numerics;
+using System.Reflection;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using IniParser;
 using IniParser.Model;
 using Microsoft.Win32;
-using System.Numerics;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Nodica;
 using Raylib_cs;
-using System.Reflection;
+using Color = Raylib_cs.Color;
+using HorizontalAlignment = System.Windows.HorizontalAlignment;
 
 namespace NodicaEditor;
 
@@ -21,6 +26,7 @@ public partial class MainWindow : Window
     private Inspector _propertyInspector;
     private static readonly FileIniDataParser _iniParser = new();
     private string _currentFilePath;
+    private string _fileExplorerRootPath;
 
     public MainWindow()
     {
@@ -30,7 +36,6 @@ public partial class MainWindow : Window
         SceneHierarchyTreeView.SelectedItemChanged += SceneHierarchyTreeView_SelectedItemChanged;
         CommandBindings.Add(new CommandBinding(ApplicationCommands.Save, Save_Executed, Save_CanExecute));
 
-        //_currentFilePath = @"D:\Parsa Stuff\Visual Studio\HordeRush\HordeRush\Res\Scenes\Menu\Menu.ini";
         _currentFilePath = @"D:\Parsa Stuff\Visual Studio\HordeRush\HordeRush\Res\Scenes\Gun.ini";
         if (File.Exists(_currentFilePath))
         {
@@ -40,6 +45,10 @@ public partial class MainWindow : Window
         {
             MessageBox.Show($"The file '{_currentFilePath}' does not exist.", "File Not Found", MessageBoxButton.OK, MessageBoxImage.Warning);
         }
+
+        // Set the root path for the file explorer
+        _fileExplorerRootPath = @"D:\Parsa Stuff\Visual Studio\HordeRush\HordeRush\Res";
+        PopulateFileExplorer(_fileExplorerRootPath);
     }
 
     private void OpenIniFile_Click(object sender, RoutedEventArgs e)
@@ -194,8 +203,6 @@ public partial class MainWindow : Window
         return propertyInfo.GetCustomAttribute<SaveExcludeAttribute>() != null;
     }
 
-
-
     private static void UpdateParentReferences(IniData iniData, string oldName, string newName)
     {
         foreach (var section in iniData.Sections)
@@ -245,4 +252,102 @@ public partial class MainWindow : Window
         return value1.Equals(value2);
     }
 
+    private void PopulateFileExplorer(string path)
+    {
+        FileExplorerItemsControl.Items.Clear(); // Clear the ItemsControl
+
+        try
+        {
+            // Add directories
+            foreach (string dir in Directory.GetDirectories(path))
+            {
+                string dirName = Path.GetFileName(dir);
+                var fileItem = CreateFileExplorerItem(dirName, true);
+                fileItem.Tag = dir;
+                fileItem.PreviewMouseLeftButtonDown += (sender, e) =>
+                {
+                    if (e.ClickCount == 2) // Double-click
+                    {
+                        PopulateFileExplorer(fileItem.Tag.ToString());
+                    }
+                };
+
+                FileExplorerItemsControl.Items.Add(fileItem); // Add to ItemsControl
+            }
+
+            // Add files
+            foreach (string file in Directory.GetFiles(path))
+            {
+                string fileName = Path.GetFileName(file);
+                var fileItem = CreateFileExplorerItem(fileName, false);
+                fileItem.Tag = file;
+                fileItem.PreviewMouseLeftButtonDown += (sender, e) =>
+                {
+                    if (e.ClickCount == 2) // Double-click
+                    {
+                        OpenFile(fileItem.Tag.ToString());
+                    }
+                };
+
+                FileExplorerItemsControl.Items.Add(fileItem); // Add to ItemsControl
+            }
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Error accessing path '{path}': {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+
+    private Grid CreateFileExplorerItem(string name, bool isDirectory)
+    {
+        // Create the main container grid
+        var grid = new Grid
+        {
+            Width = 64,
+            Height = 64,
+            Margin = new Thickness(5)
+        };
+        grid.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(48) });
+        grid.RowDefinitions.Add(new RowDefinition() { Height = GridLength.Auto });
+
+        // Image (icon)
+        var image = new System.Windows.Controls.Image
+        {
+            Source = isDirectory
+                ? new BitmapImage(new Uri($"D:\\Parsa Stuff\\Visual Studio\\NodicaEditor\\NodicaEditor\\bin\\Debug\\net8.0-windows\\Res\\Icons\\Folder.png", UriKind.RelativeOrAbsolute))
+                : new BitmapImage(new Uri($"D:\\Parsa Stuff\\Visual Studio\\NodicaEditor\\NodicaEditor\\bin\\Debug\\net8.0-windows\\Res\\Icons\\File.png", UriKind.RelativeOrAbsolute)),
+            Width = 48,
+            Height = 48,
+            HorizontalAlignment = HorizontalAlignment.Center
+        };
+        Grid.SetRow(image, 0);
+        grid.Children.Add(image);
+
+        // TextBlock (name)
+        var textBlock = new TextBlock
+        {
+            Text = name,
+            TextAlignment = TextAlignment.Center,
+            Foreground = Brushes.White,
+            TextWrapping = TextWrapping.Wrap
+        };
+        Grid.SetRow(textBlock, 1);
+        grid.Children.Add(textBlock);
+
+        return grid;
+    }
+
+    private void OpenFile(string filePath)
+    {
+        if (Path.GetExtension(filePath).Equals(".ini", StringComparison.OrdinalIgnoreCase))
+        {
+            _currentFilePath = filePath;
+            _sceneHierarchyManager.LoadScene(_currentFilePath);
+        }
+        else
+        {
+            // Handle opening other file types if needed
+            MessageBox.Show($"Opening file: {filePath}", "Open File", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+    }
 }
