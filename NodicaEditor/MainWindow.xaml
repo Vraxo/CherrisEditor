@@ -32,21 +32,7 @@
             </Grid.ColumnDefinitions>
 
             <!-- Scene Hierarchy (Left Panel) -->
-            <TreeView Name="SceneHierarchyTreeView" Grid.Column="0" Background="#1A1A1A" Foreground="#D4D4D4"
-                      SelectedItemChanged="SceneHierarchyTreeView_SelectedItemChanged">
-                <TreeView.ItemContainerStyle>
-                    <Style TargetType="TreeViewItem">
-                        <Setter Property="Foreground" Value="#D4D4D4"/>
-                        <Setter Property="Background" Value="#2A2A2A"/>
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource Self}}" Value="True">
-                                <Setter Property="Background" Value="#322222"/>
-                                <Setter Property="Foreground" Value="#FFFFFF"/>
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </TreeView.ItemContainerStyle>
-            </TreeView>
+            <local:SceneHierarchy x:Name="SceneHierarchyControl" Grid.Column="0" />
 
             <!-- Left Splitter -->
             <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
