@@ -18,29 +18,29 @@ public class Texture
 
     public Texture(string filePath)
     {
-        string pngPath =
-            Path.GetExtension(filePath).ToLower() == ".png" ?
-            filePath :
-            GetPngPath(filePath);
-
-        if (IsRaylibBackend)
-        {
-            raylibTexture = Raylib.LoadTexture(pngPath);
-            Size = new(raylibTexture.Width, raylibTexture.Height);
-        }
-        else if (IsSdl2Backend)
-        {
-            var renderer = ((SDL2DrawingBackend)((SDL2Backend)(App.Instance.Backend)).Drawing).Renderer;
-
-            sdl2Texture = SDL_image.IMG_LoadTexture(renderer, pngPath);
-            _ = SDL.SDL_QueryTexture(sdl2Texture, out _, out _, out int width, out int height);
-            Size = new(width, height);
-        }
-
-        if (pngPath != filePath)
-        {
-            File.Delete(pngPath);
-        }
+        //string pngPath =
+        //    Path.GetExtension(filePath).ToLower() == ".png" ?
+        //    filePath :
+        //    GetPngPath(filePath);
+        //
+        //if (IsRaylibBackend)
+        //{
+        //    raylibTexture = Raylib.LoadTexture(pngPath);
+        //    Size = new(raylibTexture.Width, raylibTexture.Height);
+        //}
+        //else if (IsSdl2Backend)
+        //{
+        //    var renderer = ((SDL2DrawingBackend)((SDL2Backend)(App.Instance.Backend)).Drawing).Renderer;
+        //
+        //    sdl2Texture = SDL_image.IMG_LoadTexture(renderer, pngPath);
+        //    _ = SDL.SDL_QueryTexture(sdl2Texture, out _, out _, out int width, out int height);
+        //    Size = new(width, height);
+        //}
+        //
+        //if (pngPath != filePath)
+        //{
+        //    File.Delete(pngPath);
+        //}
     }
 
     public Texture()

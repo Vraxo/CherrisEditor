@@ -2,6 +2,18 @@
 
 public class TextureRectangle : Node2D
 {
+    private string _texturePath = "";
+    public string TexturePath
+    {
+        get => _texturePath;
+
+        set
+        {
+            Texture = new(value);
+        }
+    }
+
+    [InspectorExclude]
     public Texture? Texture { get; set; }
 
     public TextureRectangle()
