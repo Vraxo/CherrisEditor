@@ -171,13 +171,15 @@ public partial class Inspector : UserControl
 
     private Expander AddInheritanceSeparator(Type type, string path, Expander parentExpander = null)
     {
-        string expanderKey = path.Split('/').Last();
+        // Use the full path as the expander key
+        string expanderKey = path;
+
         if (expanderMap.ContainsKey(expanderKey))
             return expanderMap[expanderKey];
 
         var expander = new Expander
         {
-            Header = expanderKey,
+            Header = expanderKey.Split('/').Last(), // Display only the last part
             IsExpanded = true,
             BorderBrush = SeparatorColor,
             BorderThickness = new Thickness(0, 1, 0, 1),

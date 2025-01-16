@@ -9,7 +9,6 @@ public class Button : Control
     #region [ - - - Properties & Fields - - - ]
 
     public ButtonThemePack Themes { get; set; } = new();
-
     public Vector2 TextOffset { get; set; } = Vector2.Zero;
     public HorizontalAlignment TextHorizontalAlignment { get; set; } = new();
     public VerticalAlignment TextVerticalAlignment { get; set; } = new();
