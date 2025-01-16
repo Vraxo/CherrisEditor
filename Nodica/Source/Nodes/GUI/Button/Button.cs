@@ -8,10 +8,11 @@ public class Button : Control
 
     #region [ - - - Properties & Fields - - - ]
 
+    public ButtonThemePack Themes { get; set; } = new();
+
     public Vector2 TextOffset { get; set; } = Vector2.Zero;
     public HorizontalAlignment TextHorizontalAlignment { get; set; } = new();
     public VerticalAlignment TextVerticalAlignment { get; set; } = new();
-    public ButtonThemePack Themes { get; set; } = new();
     public float AvailableWidth { get; set; } = 0;
     public ActionMode LeftClickActionMode { get; set; } = ActionMode.Release;
     public ActionMode RightClickActionMode { get; set; } = ActionMode.Release;
@@ -69,7 +70,8 @@ public class Button : Control
 
         set
         {
-            Themes = PropertyLoader.Load<ButtonThemePack>(value);
+            _themeFile = value;
+            //Themes = PropertyLoader.Load<ButtonThemePack>(value);
         }
     }
 
