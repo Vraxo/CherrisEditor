@@ -65,8 +65,7 @@
 
             <!-- Inspector Panel (Right Panel) -->
             <ScrollViewer Grid.Column="4" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
-                <StackPanel x:Name="InspectorPanel" Background="#1A1A1A" Margin="10">
-                </StackPanel>
+                <local:Inspector x:Name="InspectorControl" />
             </ScrollViewer>
         </Grid>
     </Grid>

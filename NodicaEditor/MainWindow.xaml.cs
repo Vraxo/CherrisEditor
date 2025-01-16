@@ -16,7 +16,7 @@ namespace NodicaEditor
         public MainWindow()
         {
             InitializeComponent();
-            _propertyInspector = new Inspector(InspectorPanel);
+            _propertyInspector = InspectorControl;
             SceneHierarchyControl.PropertyChanged += SceneHierarchyControl_PropertyChanged;
 
             // Add KeyDown event handler

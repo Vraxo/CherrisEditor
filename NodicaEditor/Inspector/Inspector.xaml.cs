@@ -1,26 +1,28 @@
-﻿using Nodica;
-using System.Reflection;
+﻿using System.Reflection;
+using System.Text.RegularExpressions;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using System.Windows;
+using Nodica;
+using Button = System.Windows.Controls.Button;
 using HorizontalAlignment = System.Windows.HorizontalAlignment;
 using TextBlock = System.Windows.Controls.TextBlock;
 using VerticalAlignment = System.Windows.VerticalAlignment;
-using Button = System.Windows.Controls.Button;
 
 namespace NodicaEditor;
 
-public partial class Inspector : Window
+public partial class Inspector : UserControl
 {
     private readonly StackPanel panel;
-    private readonly Dictionary<Node, Dictionary<string, object?>> nodePropertyValues = [];
+    private readonly Dictionary<Node, Dictionary<string, object?>> nodePropertyValues = new();
     private static readonly SolidColorBrush ForegroundColor = new(Colors.LightGray);
     private static readonly SolidColorBrush SeparatorColor = new(Colors.Gray);
-    private readonly Dictionary<string, Expander> expanderMap = [];
+    private readonly Dictionary<string, Expander> expanderMap = new();
 
-    public Inspector(StackPanel inspectorPanel)
+    public Inspector()
     {
-        panel = inspectorPanel;
+        InitializeComponent();
+        panel = InspectorPanel;
         expanderMap.Clear();
     }
 
@@ -31,7 +33,7 @@ public partial class Inspector : Window
             return values;
         }
 
-        return [];
+        return new Dictionary<string, object?>();
     }
 
     public void DisplayNodeProperties(Node node)
@@ -103,7 +105,7 @@ public partial class Inspector : Window
         }
     }
 
-    private static List<Type> GetInheritanceHierarchy(Type type)
+    private List<Type> GetInheritanceHierarchy(Type type)
     {
         List<Type> hierarchy = new List<Type>();
         while (type != null && type != typeof(object))
@@ -235,10 +237,10 @@ public partial class Inspector : Window
             VerticalAlignment = VerticalAlignment.Center,
             HorizontalAlignment = HorizontalAlignment.Stretch,
             ColumnDefinitions =
-        {
-            new() { Width = GridLength.Auto },
-            new() { Width = new(1, GridUnitType.Star) }
-        }
+            {
+                new() { Width = GridLength.Auto },
+                new() { Width = new GridLength(1, GridUnitType.Star) }
+            }
         };
 
         Grid.SetColumn(label, 0);
@@ -259,22 +261,22 @@ public partial class Inspector : Window
         }
     }
 
-    private static string SplitCamelCase(string input)
+    private string SplitCamelCase(string input)
     {
         if (string.IsNullOrEmpty(input))
             return input;
 
-        string result = System.Text.RegularExpressions.Regex.Replace(
+        string result = Regex.Replace(
             input,
             "([a-z])([A-Z])",
             "$1 $2",
-            System.Text.RegularExpressions.RegexOptions.Compiled);
+            RegexOptions.Compiled);
 
-        result = System.Text.RegularExpressions.Regex.Replace(
+        result = Regex.Replace(
             result,
             "([A-Z])([A-Z][a-z])",
             "$1 $2",
-            System.Text.RegularExpressions.RegexOptions.Compiled);
+            RegexOptions.Compiled);
 
         return result;
     }
