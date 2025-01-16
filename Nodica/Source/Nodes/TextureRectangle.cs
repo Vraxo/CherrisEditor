@@ -2,6 +2,8 @@
 
 public class TextureRectangle : Node2D
 {
+    public string SecondName { get; set; } = "Fucker";
+
     private string _texturePath = "";
     public string TexturePath
     {

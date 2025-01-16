@@ -35,15 +35,47 @@ namespace NodicaEditor
                     e.Effects = DragDropEffects.None;
             };
 
-            textBox.Drop += (sender, e) =>
+            textBox.PreviewDragOver += (sender, e) =>
+            {
+                // Suppress default drag behavior
+                e.Effects = DragDropEffects.Copy;
+                e.Handled = true;
+            };
+
+            textBox.PreviewDrop += (sender, e) =>
             {
                 if (e.Data.GetDataPresent(DataFormats.Text))
                 {
+                    // Completely prevent default TextBox drop behavior
+                    e.Handled = true;
+
+                    // Get the dropped file path
                     string filePath = (string)e.Data.GetData(DataFormats.Text);
+
+                    // Replace the TextBox content with the dropped file path
                     textBox.Text = filePath;
+
+                    // Update the node property value in the dictionary
                     SetStringValue(nodePropertyValues, propertyName, filePath);
                 }
             };
+
+            textBox.PreviewDragEnter += (sender, e) =>
+            {
+                // Suppress default behavior during drag enter
+                if (e.Data.GetDataPresent(DataFormats.Text))
+                {
+                    e.Effects = DragDropEffects.Copy;
+                    e.Handled = true;
+                }
+                else
+                {
+                    e.Effects = DragDropEffects.None;
+                }
+            };
+
+
+
 
             textBox.TextChanged += (sender, _) =>
             {
