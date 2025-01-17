@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using System.Resources;
 
 namespace Nodica;
 
@@ -57,14 +58,20 @@ public static class PackedSceneUtils
         foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
         {
             Type? type = assembly.GetType(typeName, false, true);
-            if (type != null)
+            
+            if (type is not null)
+            {
                 return type;
+            }
 
             string defaultNamespace = assembly.GetName().Name!;
             string namespacedTypeName = defaultNamespace + "." + typeName;
             type = assembly.GetType(namespacedTypeName, false, true);
-            if (type != null)
+            
+            if (type is not null)
+            {
                 return type;
+            }
         }
 
         throw new Exception($"Type '{typeName}' not found.");
@@ -121,6 +128,6 @@ public static class PackedSceneUtils
 
     private static Texture ParseTexture(string path)
     {
-        return TextureManager.Instance.Get(path);
+        return ResourceLoader.Load<Texture>(path);
     }
 }

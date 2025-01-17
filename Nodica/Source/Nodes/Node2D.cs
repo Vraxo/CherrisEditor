@@ -44,12 +44,12 @@ public class Node2D : VisualItem
         }
     }
 
+    [InspectorExclude]
     public Vector2 FinalSize => Size * Scale;
 
     private Vector2 _globalPosition = Vector2.Zero;
 
-    [InspectorExclude]
-    [SaveExclude]
+    [InspectorExclude, SaveExclude]
     public Vector2 GlobalPosition
     {
         get
@@ -102,6 +102,7 @@ public class Node2D : VisualItem
         }
     }
 
+    [InspectorExclude, SaveExclude]
     public Vector2 Origin
     {
         get
