@@ -1,11 +1,11 @@
-Title: Cosmocrush
 Width: 1280
 Height: 720
 MinWidth: 1280
 MinHeight: 720
 MaxWidth: -1
 MaxHeight: -1
+Title: Cosmocrushers
 ResizableWindow: true
 AntiAliasing: true
+MainScenePath: ''
 Backend: Raylib
-MainScenePath: Res/Scenes/Menu/Menu.ini
