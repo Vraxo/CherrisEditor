@@ -113,7 +113,7 @@ public partial class Inspector : UserControl
         }
     }
 
-    private List<Type> GetInheritanceHierarchy(Type type)
+    private static List<Type> GetInheritanceHierarchy(Type type)
     {
         List<Type> hierarchy = [];
 
@@ -140,8 +140,11 @@ public partial class Inspector : UserControl
 
         foreach (var property in properties)
         {
-            if (property.IsDefined(typeof(InspectorExcludeAttribute), false))
+            // Skip properties that don't have a getter
+            if (property.GetGetMethod() == null || property.IsDefined(typeof(InspectorExcludeAttribute), false))
+            {
                 continue;
+            }
 
             string fullPath = $"{parentPath}/{property.Name}";
 

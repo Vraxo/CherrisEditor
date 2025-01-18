@@ -11,8 +11,6 @@ public class BoxTheme
     public float BorderLengthBottom { get; set; } = 0;
     public float BorderLengthLeft { get; set; } = 0;
 
-    [InspectorExclude]
-    [SaveExclude]
     public float BorderLength 
     { 
         set

@@ -39,8 +39,6 @@ public sealed class ButtonThemePack
 
     // Setters
 
-    [InspectorExclude]
-    [SaveExclude]
     public float FontSpacing
     {
         set
@@ -53,8 +51,6 @@ public sealed class ButtonThemePack
         }
     }
 
-    [InspectorExclude]
-    [SaveExclude]
     public float FontSize
     {
         set
@@ -67,8 +63,6 @@ public sealed class ButtonThemePack
         }
     }
 
-    [InspectorExclude]
-    [SaveExclude]
     public Font Font
     {
         set
@@ -81,8 +75,6 @@ public sealed class ButtonThemePack
         }
     }
 
-    [InspectorExclude]
-    [SaveExclude]
     public Color FontColor
     {
         set
@@ -95,8 +87,6 @@ public sealed class ButtonThemePack
         }
     }
 
-    [InspectorExclude]
-    [SaveExclude]
     public float Roundness
     {
         set
@@ -110,8 +100,6 @@ public sealed class ButtonThemePack
         }
     }
 
-    [InspectorExclude]
-    [SaveExclude]
     public float BorderLength
     {
         set
@@ -125,8 +113,6 @@ public sealed class ButtonThemePack
         }
     }
 
-    [SaveExclude]
-    [InspectorExclude]
     public Color FillColor
     {
         set
@@ -140,8 +126,6 @@ public sealed class ButtonThemePack
         }
     }
 
-    [InspectorExclude]
-    [SaveExclude]
     public Color BorderColor
     {
         set
@@ -155,8 +139,6 @@ public sealed class ButtonThemePack
         }
     }
 
-    [InspectorExclude]
-    [SaveExclude]
     public float BorderLengthTop
     {
         set
@@ -170,8 +152,6 @@ public sealed class ButtonThemePack
         }
     }
 
-    [InspectorExclude]
-    [SaveExclude]
     public float BorderLengthBottom
     {
         set
