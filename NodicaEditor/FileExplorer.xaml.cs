@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
@@ -111,11 +112,14 @@ namespace NodicaEditor
             grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(48) });
             grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
 
+            // Get the full path by combining the current path and the file name
+            string fullPath = Path.Combine(_currentPath, name);
+
             var image = new Image
             {
                 Source = isDirectory
                     ? new BitmapImage(new Uri("D:\\Parsa Stuff\\Visual Studio\\NodicaEditor\\NodicaEditor\\bin\\Debug\\net8.0-windows\\Res\\Icons\\Folder.png", UriKind.RelativeOrAbsolute))
-                    : new BitmapImage(new Uri("D:\\Parsa Stuff\\Visual Studio\\NodicaEditor\\NodicaEditor\\bin\\Debug\\net8.0-windows\\Res\\Icons\\File.png", UriKind.RelativeOrAbsolute)),
+                    : GetImageSourceForFile(fullPath), // Pass the full path to GetImageSourceForFile
                 Width = 48,
                 Height = 48,
                 HorizontalAlignment = HorizontalAlignment.Center
@@ -135,6 +139,46 @@ namespace NodicaEditor
 
             return grid;
         }
+
+
+        private BitmapImage GetImageSourceForFile(string filePath)
+        {
+            // Check the file extension to determine if it's an image
+            string[] imageExtensions = { ".jpg", ".jpeg", ".png", ".bmp", ".gif", ".tiff", ".webp" };
+            string fileExtension = Path.GetExtension(filePath).ToLowerInvariant();
+
+            if (Array.Exists(imageExtensions, ext => ext.Equals(fileExtension)))
+            {
+                try
+                {
+                    // Debug: Log the full path and check if the file exists
+                    Debug.WriteLine($"Attempting to load image from path: {filePath}");
+
+                    // Verify if the file exists
+                    if (File.Exists(filePath))
+                    {
+                        Debug.WriteLine($"File exists: {filePath}");
+                        return new BitmapImage(new Uri(filePath, UriKind.Absolute));
+                    }
+                    else
+                    {
+                        Debug.WriteLine($"File does not exist: {filePath}");
+                        return new BitmapImage(new Uri("D:\\Parsa Stuff\\Visual Studio\\NodicaEditor\\NodicaEditor\\bin\\Debug\\net8.0-windows\\Res\\Icons\\File.png", UriKind.RelativeOrAbsolute)); // fallback icon
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"Error loading image: {ex.Message}");
+                    // Return a fallback icon in case of error
+                    return new BitmapImage(new Uri("D:\\Parsa Stuff\\Visual Studio\\NodicaEditor\\NodicaEditor\\bin\\Debug\\net8.0-windows\\Res\\Icons\\File.png", UriKind.RelativeOrAbsolute));
+                }
+            }
+
+            // Return a default file icon for non-image files
+            return new BitmapImage(new Uri("D:\\Parsa Stuff\\Visual Studio\\NodicaEditor\\NodicaEditor\\bin\\Debug\\net8.0-windows\\Res\\Icons\\File.png", UriKind.RelativeOrAbsolute));
+        }
+
+
 
         private Button CreateBackButton()
         {

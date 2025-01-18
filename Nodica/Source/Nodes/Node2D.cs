@@ -3,13 +3,13 @@
 public class Node2D : VisualItem
 {
     public Vector2 Position { get; set; } = Vector2.Zero;
-    public OriginPreset OriginPreset { get; set; } = OriginPreset.Center;
+    public float Rotation { get; set; } = 0;
     public bool InheritPosition { get; set; } = true;
     public bool InheritOrigin { get; set; } = false;
     public bool InheritScale { get; set; } = true;
+    public OriginPreset OriginPreset { get; set; } = OriginPreset.Center;
     public HorizontalAlignment HorizontalAlignment { get; set; } = HorizontalAlignment.Center;
     public VerticalAlignment VerticalAlignment { get; set; } = VerticalAlignment.Center;
-    public float Rotation { get; set; } = 0;
 
     public event EventHandler<Vector2>? SizeChanged;
 
@@ -44,12 +44,10 @@ public class Node2D : VisualItem
         }
     }
 
-    [InspectorExclude]
     public Vector2 FinalSize => Size * Scale;
 
     private Vector2 _globalPosition = Vector2.Zero;
 
-    [InspectorExclude, SaveExclude]
     public Vector2 GlobalPosition
     {
         get
@@ -102,7 +100,6 @@ public class Node2D : VisualItem
         }
     }
 
-    //[InspectorExclude, SaveExclude]
     public Vector2 Origin
     {
         get
