@@ -37,10 +37,10 @@ public static class PackedSceneUtils
                 throw new Exception($"Property '{part}' not found on type '{currentObject.GetType().Name}'.");
             }
 
-            // Skip properties that don't have setters (i.e., read-only properties)
+            // Throw an exception if the property doesn't have a setter
             if (!propertyInfo.CanWrite)
             {
-                continue;
+                throw new InvalidOperationException($"Property '{part}' does not have a setter and cannot be modified.");
             }
 
             if (i == pathParts.Length - 1)
