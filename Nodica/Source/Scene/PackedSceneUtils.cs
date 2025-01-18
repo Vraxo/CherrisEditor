@@ -31,10 +31,18 @@ public static class PackedSceneUtils
         {
             string part = pathParts[i];
             PropertyInfo? propertyInfo = currentObject!.GetType().GetProperty(part, BindingFlags.Public | BindingFlags.Instance);
+
             if (propertyInfo == null)
             {
                 throw new Exception($"Property '{part}' not found on type '{currentObject.GetType().Name}'.");
             }
+
+            // Skip properties that don't have setters (i.e., read-only properties)
+            if (!propertyInfo.CanWrite)
+            {
+                continue;
+            }
+
             if (i == pathParts.Length - 1)
             {
                 object propertyValue = ConvertValue(propertyInfo.PropertyType, value);

@@ -56,8 +56,16 @@ public partial class Inspector : UserControl
             PropertyInfo[] properties = currentType.GetProperties(BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.Instance);
             foreach (var property in properties)
             {
-                if (property.IsDefined(typeof(InspectorExcludeAttribute), false))
+                // Skip properties without setters
+                if (!property.CanWrite)
+                {
                     continue;
+                }
+
+                if (property.IsDefined(typeof(InspectorExcludeAttribute), false))
+                {
+                    continue;
+                }
 
                 // Handle resource types (like Texture) directly
                 if (property.PropertyType == typeof(Texture))
@@ -107,20 +115,25 @@ public partial class Inspector : UserControl
 
     private List<Type> GetInheritanceHierarchy(Type type)
     {
-        List<Type> hierarchy = new List<Type>();
+        List<Type> hierarchy = [];
+
         while (type != null && type != typeof(object))
         {
             hierarchy.Add(type);
             type = type.BaseType;
         }
+
         hierarchy.Reverse();
+        
         return hierarchy;
     }
 
     private void DisplayNestedProperties(object nestedObject, Node node, string parentPath, Expander parentExpander)
     {
-        if (nestedObject == null)
+        if (nestedObject is null)
+        {
             return;
+        }
 
         Type nestedType = nestedObject.GetType();
         PropertyInfo[] properties = nestedType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
@@ -174,20 +187,22 @@ public partial class Inspector : UserControl
         // Use the full path as the expander key
         string expanderKey = path;
 
-        if (expanderMap.ContainsKey(expanderKey))
-            return expanderMap[expanderKey];
+        if (expanderMap.TryGetValue(expanderKey, out Expander? value))
+        {
+            return value;
+        }
 
-        var expander = new Expander
+        Expander expander = new()
         {
             Header = expanderKey.Split('/').Last(), // Display only the last part
             IsExpanded = true,
             BorderBrush = SeparatorColor,
-            BorderThickness = new Thickness(0, 1, 0, 1),
-            Margin = new Thickness(parentExpander != null ? 20 : 0, 5, 0, 5),
+            BorderThickness = new(0, 1, 0, 1),
+            Margin = new(parentExpander != null ? 20 : 0, 5, 0, 5),
             Foreground = SeparatorColor
         };
 
-        var contentPanel = new StackPanel();
+        StackPanel contentPanel = new();
         expander.Content = contentPanel;
 
         if (parentExpander != null && parentExpander.Content is StackPanel parentContentPanel)
@@ -205,13 +220,18 @@ public partial class Inspector : UserControl
 
     private void AddPropertyControlToExpander(Node node, PropertyInfo property, FrameworkElement propertyControl, Expander expander, string fullPath, Dictionary<string, object?> nodePropertyValues)
     {
-        var controlAndResetPanel = new StackPanel()
+        StackPanel controlAndResetPanel = new()
         {
             Orientation = Orientation.Horizontal,
             HorizontalAlignment = HorizontalAlignment.Right
         };
 
-        Button resetButton = PropertyControlFactory.CreateResetButton(node, property, fullPath, nodePropertyValues, propertyControl);
+        Button resetButton = PropertyControlFactory.CreateResetButton(
+            node,
+            property,
+            fullPath,
+            nodePropertyValues,
+            propertyControl);
 
         controlAndResetPanel.Children.Add(propertyControl);
         controlAndResetPanel.Children.Add(resetButton);
@@ -263,10 +283,12 @@ public partial class Inspector : UserControl
         }
     }
 
-    private string SplitCamelCase(string input)
+    private static string SplitCamelCase(string input)
     {
         if (string.IsNullOrEmpty(input))
+        {
             return input;
+        }
 
         string result = Regex.Replace(
             input,

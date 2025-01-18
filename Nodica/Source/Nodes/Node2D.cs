@@ -102,7 +102,7 @@ public class Node2D : VisualItem
         }
     }
 
-    [InspectorExclude, SaveExclude]
+    //[InspectorExclude, SaveExclude]
     public Vector2 Origin
     {
         get
