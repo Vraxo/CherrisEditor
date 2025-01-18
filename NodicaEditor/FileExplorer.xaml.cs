@@ -1,5 +1,5 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
@@ -7,203 +7,246 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
-namespace NodicaEditor
+namespace NodicaEditor;
+
+public partial class FileExplorer : UserControl
 {
-    public partial class FileExplorer : UserControl
+    public string RootPath { get; set; } = "";
+    private string currentPath = "";
+
+    public event Action<string>? FileOpened;
+
+    public FileExplorer()
     {
-        public string RootPath { get; set; }
-        private string _currentPath;
+        InitializeComponent();
 
-        public event Action<string> FileOpened; // Event to notify about opened files
+        RootPath = "D:\\Parsa Stuff\\Visual Studio\\HordeRush\\HordeRush\\Res";
 
-        public FileExplorer()
+        if (!RootPath.EndsWith(Path.DirectorySeparatorChar.ToString()))
         {
-            InitializeComponent();
-            // Ensure RootPath ends with a directory separator
-            RootPath = "D:\\Parsa Stuff\\Visual Studio\\HordeRush\\HordeRush\\Res";
-            if (!RootPath.EndsWith(Path.DirectorySeparatorChar.ToString()))
+            RootPath += Path.DirectorySeparatorChar;
+        }
+    }
+
+    public void Populate(string path)
+    {
+        if (string.IsNullOrEmpty(path)) return;
+
+        FileExplorerItemsControl.Items.Clear();
+        currentPath = path;
+
+        try
+        {
+            AddBackButtonIfNotRoot();
+            AddDirectoriesToExplorer(path);
+            AddFilesToExplorer(path);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Error accessing path '{path}': {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+
+    private void AddBackButtonIfNotRoot()
+    {
+        if (currentPath != RootPath)
+        {
+            Button backButton = CreateBackButton();
+            FileExplorerItemsControl.Items.Add(backButton);
+        }
+    }
+
+    private void AddDirectoriesToExplorer(string path)
+    {
+        foreach (string dir in Directory.GetDirectories(path))
+        {
+            string dirName = Path.GetFileName(dir);
+            Grid fileItem = CreateItem(dirName, true);
+            fileItem.Tag = dir;
+            fileItem.PreviewMouseLeftButtonDown += (sender, e) => HandleDirectoryItemClick(fileItem, e);
+
+            FileExplorerItemsControl.Items.Add(fileItem);
+        }
+    }
+
+    private void HandleDirectoryItemClick(Grid fileItem, MouseButtonEventArgs e)
+    {
+        if (e.ClickCount == 2)
+        {
+            string? path = fileItem.Tag.ToString();
+
+            if (path is not null)
             {
-                RootPath += Path.DirectorySeparatorChar;
+                Populate(path);
             }
         }
+    }
 
-        public void Populate(string path)
+    private void AddFilesToExplorer(string path)
+    {
+        foreach (string file in Directory.GetFiles(path))
         {
-            FileExplorerItemsControl.Items.Clear();
-            _currentPath = path;
+            string fileName = Path.GetFileName(file);
+            var fileItem = CreateItem(fileName, false);
+            fileItem.Tag = file;
+            fileItem.PreviewMouseLeftButtonDown += (sender, e) => HandleFileItemClick(fileItem, e);
 
+            FileExplorerItemsControl.Items.Add(fileItem);
+        }
+    }
+
+    private void HandleFileItemClick(Grid fileItem, MouseButtonEventArgs e)
+    {
+        if (e.ClickCount == 1)
+        {
+            string? fullPath = fileItem.Tag.ToString();
+            if (fullPath is not null)
+            {
+                string relativePath = GetRelativePath(fullPath);
+                DragDrop.DoDragDrop(fileItem, relativePath, DragDropEffects.Copy);
+            }
+
+            e.Handled = true;
+        }
+        else if (e.ClickCount == 2)
+        {
+            string? path = fileItem.Tag.ToString();
+            if (path is not null)
+            {
+                FileOpened?.Invoke(path);
+            }
+        }
+    }
+
+    private string GetRelativePath(string fullPath)
+    {
+        if (fullPath.StartsWith(RootPath, StringComparison.OrdinalIgnoreCase))
+        {
+            string relativePath = fullPath.Substring(RootPath.Length).TrimStart(Path.DirectorySeparatorChar);
+            return $"Res{Path.DirectorySeparatorChar}{relativePath}";
+        }
+        else
+        {
+            return fullPath;
+        }
+    }
+
+    private Grid CreateItem(string name, bool isDirectory)
+    {
+        Grid grid = new()
+        {
+            Width = 64,
+            Height = 64,
+            Margin = new(5),
+            AllowDrop = false,
+            RowDefinitions =
+        {
+            new() { Height = new(48) },
+            new() { Height = GridLength.Auto }
+        },
+            Background = Brushes.Transparent, // Default background
+        };
+
+        string fullPath = Path.Combine(currentPath, name);
+
+        Image image = new()
+        {
+            Source = isDirectory
+                ? new BitmapImage(new Uri("D:\\Parsa Stuff\\Visual Studio\\NodicaEditor\\NodicaEditor\\bin\\Debug\\net8.0-windows\\Res\\Icons\\Folder.png", UriKind.RelativeOrAbsolute))
+                : GetImageSourceForFile(fullPath),
+            Width = 48,
+            Height = 48,
+            HorizontalAlignment = HorizontalAlignment.Center
+        };
+        Grid.SetRow(image, 0);
+        grid.Children.Add(image);
+
+        TextBlock textBlock = new()
+        {
+            Text = name,
+            TextAlignment = TextAlignment.Center,
+            Foreground = Brushes.White,
+            TextWrapping = TextWrapping.Wrap,
+        };
+
+        Grid.SetRow(textBlock, 1);
+        grid.Children.Add(textBlock);
+
+        // Apply hover effect only for non-back items
+        if (name != "..") // Skip back button (named "..")
+        {
+            grid.MouseEnter += (sender, e) =>
+            {
+                grid.Background = new SolidColorBrush(Color.FromArgb(0xFF, 0x2D, 0x6B, 0x99)); // Hover color
+            };
+
+            grid.MouseLeave += (sender, e) =>
+            {
+                grid.Background = Brushes.Transparent; // Reset background when mouse leaves
+            };
+        }
+
+        return grid;
+    }
+
+
+
+    private static BitmapImage GetImageSourceForFile(string filePath)
+    {
+        string[] imageExtensions = { ".jpg", ".jpeg", ".png", ".bmp", ".gif", ".tiff", ".webp" };
+        string fileExtension = Path.GetExtension(filePath).ToLowerInvariant();
+
+        if (Array.Exists(imageExtensions, ext => ext.Equals(fileExtension)))
+        {
             try
             {
-                // Add a "Back" button if not in the root directory
-                if (_currentPath != RootPath)
+                Debug.WriteLine($"Attempting to load image from path: {filePath}");
+
+                if (File.Exists(filePath))
                 {
-                    var backButton = CreateBackButton();
-                    FileExplorerItemsControl.Items.Add(backButton);
+                    Debug.WriteLine($"File exists: {filePath}");
+                    return new BitmapImage(new Uri(filePath, UriKind.Absolute));
                 }
-
-                // Add directories
-                foreach (string dir in Directory.GetDirectories(path))
+                else
                 {
-                    string dirName = Path.GetFileName(dir);
-                    var fileItem = CreateFileExplorerItem(dirName, true);
-                    fileItem.Tag = dir;
-                    fileItem.PreviewMouseLeftButtonDown += (sender, e) =>
-                    {
-                        if (e.ClickCount == 2) // Double-click to open
-                        {
-                            Populate(fileItem.Tag.ToString());
-                        }
-                    };
-
-                    FileExplorerItemsControl.Items.Add(fileItem);
-                }
-
-                // Add files
-                foreach (string file in Directory.GetFiles(path))
-                {
-                    string fileName = Path.GetFileName(file);
-                    var fileItem = CreateFileExplorerItem(fileName, false);
-                    fileItem.Tag = file;
-                    fileItem.PreviewMouseLeftButtonDown += (sender, e) =>
-                    {
-                        if (e.ClickCount == 1) // Single-click to drag
-                        {
-                            string relativePath = GetRelativePath(fileItem.Tag.ToString());
-                            DragDrop.DoDragDrop(fileItem, relativePath, DragDropEffects.Copy);
-                            e.Handled = true;
-                        }
-                        else if (e.ClickCount == 2) // Double-click to open
-                        {
-                            FileOpened?.Invoke(fileItem.Tag.ToString());
-                        }
-                    };
-
-                    FileExplorerItemsControl.Items.Add(fileItem);
+                    Debug.WriteLine($"File does not exist: {filePath}");
+                    return new BitmapImage(new Uri("D:\\Parsa Stuff\\Visual Studio\\NodicaEditor\\NodicaEditor\\bin\\Debug\\net8.0-windows\\Res\\Icons\\File.png", UriKind.RelativeOrAbsolute)); // fallback icon
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error accessing path '{path}': {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                Debug.WriteLine($"Error loading image: {ex.Message}");
+                return new BitmapImage(new Uri("D:\\Parsa Stuff\\Visual Studio\\NodicaEditor\\NodicaEditor\\bin\\Debug\\net8.0-windows\\Res\\Icons\\File.png", UriKind.RelativeOrAbsolute));
             }
         }
 
-        private string GetRelativePath(string fullPath)
+        return new BitmapImage(new Uri("D:\\Parsa Stuff\\Visual Studio\\NodicaEditor\\NodicaEditor\\bin\\Debug\\net8.0-windows\\Res\\Icons\\File.png", UriKind.RelativeOrAbsolute));
+    }
+
+    private Button CreateBackButton()
+    {
+        Button backButton = new()
         {
-            if (fullPath.StartsWith(RootPath, StringComparison.OrdinalIgnoreCase))
-            {
-                string relativePath = fullPath.Substring(RootPath.Length).TrimStart(Path.DirectorySeparatorChar);
-                return $"Res{Path.DirectorySeparatorChar}{relativePath}";
-            }
-            else
-            {
-                return fullPath; // Handle this case as needed
-            }
-        }
+            Content = CreateItem("..", true),
+            Tag = "Back",
+            Background = Brushes.Transparent,
+            BorderThickness = new Thickness(0),
+            Padding = new Thickness(5)
+        };
 
-        private Grid CreateFileExplorerItem(string name, bool isDirectory)
+        backButton.PreviewMouseLeftButtonDown += (sender, e) =>
         {
-            var grid = new Grid
+            if (e.ClickCount == 2)
             {
-                Width = 64,
-                Height = 64,
-                Margin = new Thickness(5),
-                AllowDrop = false // Set to false as we are the source
-            };
-            grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(48) });
-            grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+                string? parentDirectory = Directory.GetParent(currentPath)?.FullName;
 
-            // Get the full path by combining the current path and the file name
-            string fullPath = Path.Combine(_currentPath, name);
-
-            var image = new Image
-            {
-                Source = isDirectory
-                    ? new BitmapImage(new Uri("D:\\Parsa Stuff\\Visual Studio\\NodicaEditor\\NodicaEditor\\bin\\Debug\\net8.0-windows\\Res\\Icons\\Folder.png", UriKind.RelativeOrAbsolute))
-                    : GetImageSourceForFile(fullPath), // Pass the full path to GetImageSourceForFile
-                Width = 48,
-                Height = 48,
-                HorizontalAlignment = HorizontalAlignment.Center
-            };
-            Grid.SetRow(image, 0);
-            grid.Children.Add(image);
-
-            var textBlock = new TextBlock
-            {
-                Text = name,
-                TextAlignment = TextAlignment.Center,
-                Foreground = Brushes.White,
-                TextWrapping = TextWrapping.Wrap
-            };
-            Grid.SetRow(textBlock, 1);
-            grid.Children.Add(textBlock);
-
-            return grid;
-        }
-
-
-        private BitmapImage GetImageSourceForFile(string filePath)
-        {
-            // Check the file extension to determine if it's an image
-            string[] imageExtensions = { ".jpg", ".jpeg", ".png", ".bmp", ".gif", ".tiff", ".webp" };
-            string fileExtension = Path.GetExtension(filePath).ToLowerInvariant();
-
-            if (Array.Exists(imageExtensions, ext => ext.Equals(fileExtension)))
-            {
-                try
+                if (parentDirectory is not null)
                 {
-                    // Debug: Log the full path and check if the file exists
-                    Debug.WriteLine($"Attempting to load image from path: {filePath}");
-
-                    // Verify if the file exists
-                    if (File.Exists(filePath))
-                    {
-                        Debug.WriteLine($"File exists: {filePath}");
-                        return new BitmapImage(new Uri(filePath, UriKind.Absolute));
-                    }
-                    else
-                    {
-                        Debug.WriteLine($"File does not exist: {filePath}");
-                        return new BitmapImage(new Uri("D:\\Parsa Stuff\\Visual Studio\\NodicaEditor\\NodicaEditor\\bin\\Debug\\net8.0-windows\\Res\\Icons\\File.png", UriKind.RelativeOrAbsolute)); // fallback icon
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine($"Error loading image: {ex.Message}");
-                    // Return a fallback icon in case of error
-                    return new BitmapImage(new Uri("D:\\Parsa Stuff\\Visual Studio\\NodicaEditor\\NodicaEditor\\bin\\Debug\\net8.0-windows\\Res\\Icons\\File.png", UriKind.RelativeOrAbsolute));
+                    Populate(parentDirectory);
                 }
             }
+        };
 
-            // Return a default file icon for non-image files
-            return new BitmapImage(new Uri("D:\\Parsa Stuff\\Visual Studio\\NodicaEditor\\NodicaEditor\\bin\\Debug\\net8.0-windows\\Res\\Icons\\File.png", UriKind.RelativeOrAbsolute));
-        }
-
-
-
-        private Button CreateBackButton()
-        {
-            var backButton = new Button
-            {
-                Content = CreateFileExplorerItem("..", true),
-                Tag = "Back",
-                Background = Brushes.Transparent,
-                BorderThickness = new Thickness(0),
-                Padding = new Thickness(5)
-            };
-
-            backButton.PreviewMouseLeftButtonDown += (sender, e) =>
-            {
-                if (e.ClickCount == 2)
-                {
-                    string parentDirectory = Directory.GetParent(_currentPath)?.FullName;
-                    if (parentDirectory != null)
-                    {
-                        Populate(parentDirectory);
-                    }
-                }
-            };
-
-            return backButton;
-        }
+        return backButton;
     }
 }
