@@ -19,6 +19,9 @@
             <MenuItem Header="_File">
                 <MenuItem Header="_Open INI File..." Click="OpenIniFile_Click"/>
             </MenuItem>
+            <MenuItem Header="_Project">
+                <MenuItem Header="_Open Project..." Click="OpenProject_Click"/>
+            </MenuItem>
         </Menu>
 
         <!-- Main Layout -->

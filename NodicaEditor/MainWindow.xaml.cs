@@ -56,6 +56,13 @@ public partial class MainWindow : Window
         }
     }
 
+    private void OpenProject_Click(object sender, RoutedEventArgs e)
+    {
+        // Open the Project window
+        ProjectWindow projectWindow = new ProjectWindow();
+        projectWindow.Show(); // Show the Project window
+    }
+
     private void Window_KeyDown(object sender, KeyEventArgs e)
     {
         if (e.Key == Key.S && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)

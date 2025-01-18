@@ -189,8 +189,6 @@ public partial class FileExplorer : UserControl
         return grid;
     }
 
-
-
     private static BitmapImage GetImageSourceForFile(string filePath)
     {
         string[] imageExtensions = { ".jpg", ".jpeg", ".png", ".bmp", ".gif", ".tiff", ".webp" };
