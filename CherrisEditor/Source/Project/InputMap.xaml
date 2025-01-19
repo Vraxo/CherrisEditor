@@ -25,64 +25,62 @@
                                 Background="{TemplateBinding Background}"
                                 SnapsToDevicePixels="True">
                             <DockPanel>
-                                <!-- Make ToggleButton fill the header area -->
-                                <ToggleButton x:Name="HeaderSite"
-                                              DockPanel.Dock="Top"
-                                              Focusable="False"
-                                              IsChecked="{Binding IsExpanded, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
-                                              Background="Transparent"
-                                              BorderThickness="0">
-                                    <ToggleButton.Template>
-                                        <ControlTemplate TargetType="{x:Type ToggleButton}">
-                                            <Border Background="{TemplateBinding Background}">
-                                                <Grid>
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="*" />
-                                                        <ColumnDefinition Width="Auto" />
-                                                    </Grid.ColumnDefinitions>
-                                                    <TextBox x:Name="HeaderTextBox"
-                                                             Grid.Column="0"
-                                                             VerticalAlignment="Center"
-                                                             HorizontalAlignment="Left"
-                                                             Text="{Binding Header, RelativeSource={RelativeSource AncestorType=Expander}, Mode=TwoWay}"
-                                                             Background="Transparent"
-                                                             Foreground="LightGray"
-                                                             BorderThickness="0"
-                                                             Margin="5,0,0,0"
-                                                             LostFocus="HeaderTextBox_LostFocus"
-                                                             KeyDown="HeaderTextBox_KeyDown"
-                                                             />
+                                <!-- Header Area -->
+                                <DockPanel DockPanel.Dock="Top">
+                                    <!-- Expander ToggleButton -->
+                                    <ToggleButton x:Name="HeaderSite"
+                                                  DockPanel.Dock="Right"
+                                                  Focusable="False"
+                                                  IsChecked="{Binding IsExpanded, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+                                                  Background="Transparent"
+                                                  BorderThickness="0">
+                                        <ToggleButton.Template>
+                                            <ControlTemplate TargetType="{x:Type ToggleButton}">
+                                                <Border Background="Transparent">
+                                                    <Grid>
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <Button x:Name="DeleteButton"
+                                                                    Content="X"
+                                                                    Width="25"
+                                                                    Height="20"
+                                                                    Margin="5,0,5,0"
+                                                                    VerticalAlignment="Center"
+                                                                    Click="DeleteAction_Click"
+                                                                    Style="{DynamicResource AddBindingButtonStyle}" />
+                                                            <Path x:Name="Arrow"
+                                                                  Fill="{TemplateBinding Foreground}"
+                                                                  VerticalAlignment="Center"
+                                                                  Margin="0,0,10,0"
+                                                                  Data="M 0 0 L 4 4 L 8 0 Z" />
+                                                        </StackPanel>
+                                                    </Grid>
+                                                </Border>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsChecked" Value="True">
+                                                        <Setter TargetName="Arrow" Property="Data" Value="M 0 4 L 4 0 L 8 4 Z" />
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </ToggleButton.Template>
+                                    </ToggleButton>
 
-                                                    <StackPanel Grid.Column="1" Orientation="Horizontal">
-                                                        <Button x:Name="DeleteButton"
-                                                                Content="X"
-                                                                Width="25"
-                                                                Height="20"
-                                                                Margin="5,0,5,0"
-                                                                VerticalAlignment="Center"
-                                                                Click="DeleteAction_Click"
-                                                                Style="{DynamicResource AddBindingButtonStyle}" />
-                                                        <Path x:Name="Arrow"
-                                                              Fill="{TemplateBinding Foreground}"
-                                                              VerticalAlignment="Center"
-                                                              Margin="0,0,10,0"
-                                                              Data="M 0 0 L 4 4 L 8 0 Z" />
-                                                    </StackPanel>
-                                                </Grid>
-                                            </Border>
-                                            <ControlTemplate.Triggers>
-                                                <Trigger Property="IsChecked" Value="True">
-                                                    <Setter TargetName="Arrow" Property="Data" Value="M 0 4 L 4 0 L 8 4 Z" />
-                                                </Trigger>
-                                            </ControlTemplate.Triggers>
-                                        </ControlTemplate>
-                                    </ToggleButton.Template>
-                                    <ContentPresenter Content="{TemplateBinding Header}"
-                                                      HorizontalAlignment="Stretch"
-                                                      VerticalAlignment="Stretch" />
-                                </ToggleButton>
+                                    <!-- Edit Action Name TextBox -->
+                                    <TextBox x:Name="HeaderTextBox"
+                                             VerticalAlignment="Center"
+                                             HorizontalAlignment="Left"
+                                             Text="{Binding Header, RelativeSource={RelativeSource AncestorType=Expander}, Mode=TwoWay}"
+                                             Background="Transparent"
+                                             Foreground="LightGray"
+                                             BorderThickness="0"
+                                             Margin="5,0,0,0"
+                                             MinWidth="100"
+                                             LostFocus="HeaderTextBox_LostFocus"
+                                             KeyDown="HeaderTextBox_KeyDown"
+                                             />
+                                </DockPanel>
+
+                                <!-- Content Area -->
                                 <ContentPresenter x:Name="ContentSite"
-                                                  DockPanel.Dock="Bottom"
                                                   Focusable="False"
                                                   HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
                                                   Margin="{TemplateBinding Padding}"
