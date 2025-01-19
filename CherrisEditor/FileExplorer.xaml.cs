@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Windows;
@@ -189,36 +190,52 @@ public partial class FileExplorer : UserControl
         return grid;
     }
 
-    private static BitmapImage GetImageSourceForFile(string filePath)
+    private BitmapImage GetImageSourceForFile(string filePath)
     {
-        string[] imageExtensions = { ".jpg", ".jpeg", ".png", ".bmp", ".gif", ".tiff", ".webp" };
         string fileExtension = Path.GetExtension(filePath).ToLowerInvariant();
 
+        // Define the paths to your specific icons
+        string defaultIconPath = "D:\\Parsa Stuff\\Visual Studio\\CherrisEditor\\CherrisEditor\\bin\\Debug\\net8.0-windows\\Res\\Icons\\File.png";
+        string fontIconPath = "D:\\Parsa Stuff\\Visual Studio\\CherrisEditor\\CherrisEditor\\bin\\Debug\\net8.0-windows\\Res\\Icons\\Font.png";
+        string audioIconPath = "D:\\Parsa Stuff\\Visual Studio\\CherrisEditor\\CherrisEditor\\bin\\Debug\\net8.0-windows\\Res\\Icons\\Audio.png";
+        string themeIconPath = "D:\\Parsa Stuff\\Visual Studio\\CherrisEditor\\CherrisEditor\\bin\\Debug\\net8.0-windows\\Res\\Icons\\Theme.png";
+        string sceneIconPath = "D:\\Parsa Stuff\\Visual Studio\\CherrisEditor\\CherrisEditor\\bin\\Debug\\net8.0-windows\\Res\\Icons\\Scene.png";
+
+        // Choose the icon based on the file extension
+        string iconPath = fileExtension switch
+        {
+            ".ttf" => fontIconPath,
+            ".mp3" => audioIconPath,
+            ".ini" when Path.GetFileName(filePath).Equals("theme.ini", StringComparison.OrdinalIgnoreCase) => themeIconPath,
+            ".ini" => sceneIconPath,
+            _ => defaultIconPath,
+        };
+
+        // For image files, attempt to load the image itself
+        string[] imageExtensions = { ".jpg", ".jpeg", ".png", ".bmp", ".gif", ".tiff", ".webp" };
         if (Array.Exists(imageExtensions, ext => ext.Equals(fileExtension)))
         {
             try
             {
-                Debug.WriteLine($"Attempting to load image from path: {filePath}");
-
                 if (File.Exists(filePath))
                 {
-                    Debug.WriteLine($"File exists: {filePath}");
                     return new BitmapImage(new Uri(filePath, UriKind.Absolute));
                 }
                 else
                 {
                     Debug.WriteLine($"File does not exist: {filePath}");
-                    return new BitmapImage(new Uri("D:\\Parsa Stuff\\Visual Studio\\CherrisEditor\\CherrisEditor\\bin\\Debug\\net8.0-windows\\Res\\Icons\\File.png", UriKind.RelativeOrAbsolute)); // fallback icon
+                    return new BitmapImage(new Uri(defaultIconPath, UriKind.RelativeOrAbsolute)); // Use default icon if file doesn't exist
                 }
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"Error loading image: {ex.Message}");
-                return new BitmapImage(new Uri("D:\\Parsa Stuff\\Visual Studio\\CherrisEditor\\CherrisEditor\\bin\\Debug\\net8.0-windows\\Res\\Icons\\File.png", UriKind.RelativeOrAbsolute));
+                return new BitmapImage(new Uri(defaultIconPath, UriKind.RelativeOrAbsolute)); // Use default icon on error
             }
         }
 
-        return new BitmapImage(new Uri("D:\\Parsa Stuff\\Visual Studio\\CherrisEditor\\CherrisEditor\\bin\\Debug\\net8.0-windows\\Res\\Icons\\File.png", UriKind.RelativeOrAbsolute));
+        // Return the selected icon
+        return new BitmapImage(new Uri(iconPath, UriKind.RelativeOrAbsolute));
     }
 
     private Button CreateBackButton()
