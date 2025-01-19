@@ -1,6 +1,4 @@
-﻿using System;
-using System.Diagnostics;
-using System.Globalization;
+﻿using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
@@ -16,6 +14,13 @@ public partial class FileExplorer : UserControl
     public string currentPath = "";
 
     public event Action<string>? FileOpened;
+
+    private const string defaultIconPath = "D:\\Parsa Stuff\\Visual Studio\\CherrisEditor\\CherrisEditor\\bin\\Debug\\net8.0-windows\\Res\\Icons\\File.png";
+    private const string folderIconPath = "D:\\Parsa Stuff\\Visual Studio\\CherrisEditor\\CherrisEditor\\bin\\Debug\\net8.0-windows\\Res\\Icons\\Folder.png";
+    private const string fontIconPath = "D:\\Parsa Stuff\\Visual Studio\\CherrisEditor\\CherrisEditor\\bin\\Debug\\net8.0-windows\\Res\\Icons\\Font.png";
+    private const string audioIconPath = "D:\\Parsa Stuff\\Visual Studio\\CherrisEditor\\CherrisEditor\\bin\\Debug\\net8.0-windows\\Res\\Icons\\Audio.png";
+    private const string themeIconPath = "D:\\Parsa Stuff\\Visual Studio\\CherrisEditor\\CherrisEditor\\bin\\Debug\\net8.0-windows\\Res\\Icons\\Theme.png";
+    private const string sceneIconPath = "D:\\Parsa Stuff\\Visual Studio\\CherrisEditor\\CherrisEditor\\bin\\Debug\\net8.0-windows\\Res\\Icons\\Scene.png";
 
     public FileExplorer()
     {
@@ -101,6 +106,7 @@ public partial class FileExplorer : UserControl
         if (e.ClickCount == 1)
         {
             string? fullPath = fileItem.Tag.ToString();
+
             if (fullPath is not null)
             {
                 string relativePath = GetRelativePath(fullPath);
@@ -112,6 +118,7 @@ public partial class FileExplorer : UserControl
         else if (e.ClickCount == 2)
         {
             string? path = fileItem.Tag.ToString();
+
             if (path is not null)
             {
                 FileOpened?.Invoke(path);
@@ -123,7 +130,7 @@ public partial class FileExplorer : UserControl
     {
         if (fullPath.StartsWith(RootPath, StringComparison.OrdinalIgnoreCase))
         {
-            string relativePath = fullPath.Substring(RootPath.Length).TrimStart(Path.DirectorySeparatorChar);
+            string relativePath = fullPath[RootPath.Length..].TrimStart(Path.DirectorySeparatorChar);
             return $"Res{Path.DirectorySeparatorChar}{relativePath}";
         }
         else
@@ -136,16 +143,16 @@ public partial class FileExplorer : UserControl
     {
         Grid grid = new()
         {
-            Width = 64,
-            Height = 64,
+            Width = 72,
+            Height = 82,
             Margin = new(5),
             AllowDrop = false,
             RowDefinitions =
-        {
-            new() { Height = new(48) },
-            new() { Height = GridLength.Auto }
-        },
-            Background = Brushes.Transparent, // Default background
+            {
+                new() { Height = new(48) },
+                new() { Height = GridLength.Auto }
+            },
+            Background = Brushes.Transparent,
         };
 
         string fullPath = Path.Combine(currentPath, name);
@@ -153,7 +160,7 @@ public partial class FileExplorer : UserControl
         Image image = new()
         {
             Source = isDirectory
-                ? new BitmapImage(new Uri("D:\\Parsa Stuff\\Visual Studio\\CherrisEditor\\CherrisEditor\\bin\\Debug\\net8.0-windows\\Res\\Icons\\Folder.png", UriKind.RelativeOrAbsolute))
+                ? new BitmapImage(new(folderIconPath, UriKind.Absolute))
                 : GetImageSourceForFile(fullPath),
             Width = 48,
             Height = 48,
@@ -168,74 +175,66 @@ public partial class FileExplorer : UserControl
             TextAlignment = TextAlignment.Center,
             Foreground = Brushes.White,
             TextWrapping = TextWrapping.Wrap,
+            FontSize = 10,
+            Margin = new(0, 2, 0, 0)
         };
 
         Grid.SetRow(textBlock, 1);
         grid.Children.Add(textBlock);
 
-        // Apply hover effect only for non-back items
-        if (name != "..") // Skip back button (named "..")
+        if (name != "..")
         {
             grid.MouseEnter += (sender, e) =>
             {
-                grid.Background = new SolidColorBrush(Color.FromArgb(0xFF, 0x2D, 0x6B, 0x99)); // Hover color
+                grid.Background = new SolidColorBrush(Color.FromArgb(0xFF, 0x2D, 0x6B, 0x99));
             };
 
             grid.MouseLeave += (sender, e) =>
             {
-                grid.Background = Brushes.Transparent; // Reset background when mouse leaves
+                grid.Background = Brushes.Transparent;
             };
         }
 
         return grid;
     }
 
-    private BitmapImage GetImageSourceForFile(string filePath)
+    private static BitmapImage GetImageSourceForFile(string filePath)
     {
         string fileExtension = Path.GetExtension(filePath).ToLowerInvariant();
 
-        // Define the paths to your specific icons
-        string defaultIconPath = "D:\\Parsa Stuff\\Visual Studio\\CherrisEditor\\CherrisEditor\\bin\\Debug\\net8.0-windows\\Res\\Icons\\File.png";
-        string fontIconPath = "D:\\Parsa Stuff\\Visual Studio\\CherrisEditor\\CherrisEditor\\bin\\Debug\\net8.0-windows\\Res\\Icons\\Font.png";
-        string audioIconPath = "D:\\Parsa Stuff\\Visual Studio\\CherrisEditor\\CherrisEditor\\bin\\Debug\\net8.0-windows\\Res\\Icons\\Audio.png";
-        string themeIconPath = "D:\\Parsa Stuff\\Visual Studio\\CherrisEditor\\CherrisEditor\\bin\\Debug\\net8.0-windows\\Res\\Icons\\Theme.png";
-        string sceneIconPath = "D:\\Parsa Stuff\\Visual Studio\\CherrisEditor\\CherrisEditor\\bin\\Debug\\net8.0-windows\\Res\\Icons\\Scene.png";
-
-        // Choose the icon based on the file extension
         string iconPath = fileExtension switch
         {
             ".ttf" => fontIconPath,
             ".mp3" => audioIconPath,
-            ".ini" when Path.GetFileName(filePath).Equals("theme.ini", StringComparison.OrdinalIgnoreCase) => themeIconPath,
+            ".ini" when Path.GetFileNameWithoutExtension(filePath).EndsWith(".theme", StringComparison.OrdinalIgnoreCase) => themeIconPath,
             ".ini" => sceneIconPath,
             _ => defaultIconPath,
         };
 
-        // For image files, attempt to load the image itself
         string[] imageExtensions = { ".jpg", ".jpeg", ".png", ".bmp", ".gif", ".tiff", ".webp" };
+
         if (Array.Exists(imageExtensions, ext => ext.Equals(fileExtension)))
         {
             try
             {
                 if (File.Exists(filePath))
                 {
-                    return new BitmapImage(new Uri(filePath, UriKind.Absolute));
+                    return new(new(filePath, UriKind.Absolute));
                 }
                 else
                 {
                     Debug.WriteLine($"File does not exist: {filePath}");
-                    return new BitmapImage(new Uri(defaultIconPath, UriKind.RelativeOrAbsolute)); // Use default icon if file doesn't exist
+                    return new(new(defaultIconPath, UriKind.RelativeOrAbsolute));
                 }
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"Error loading image: {ex.Message}");
-                return new BitmapImage(new Uri(defaultIconPath, UriKind.RelativeOrAbsolute)); // Use default icon on error
+                return new(new(defaultIconPath, UriKind.RelativeOrAbsolute));
             }
         }
 
-        // Return the selected icon
-        return new BitmapImage(new Uri(iconPath, UriKind.RelativeOrAbsolute));
+        return new(new(iconPath, UriKind.RelativeOrAbsolute));
     }
 
     private Button CreateBackButton()
@@ -251,14 +250,16 @@ public partial class FileExplorer : UserControl
 
         backButton.PreviewMouseLeftButtonDown += (sender, e) =>
         {
-            if (e.ClickCount == 2)
+            if (e.ClickCount != 2)
             {
-                string? parentDirectory = Directory.GetParent(currentPath)?.FullName;
+                return;
+            }
 
-                if (parentDirectory is not null)
-                {
-                    Populate(parentDirectory);
-                }
+            string? parentDirectory = Directory.GetParent(currentPath)?.FullName;
+
+            if (parentDirectory is not null)
+            {
+                Populate(parentDirectory);
             }
         };
 
