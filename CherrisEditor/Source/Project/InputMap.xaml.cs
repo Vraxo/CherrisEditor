@@ -73,19 +73,22 @@ public partial class InputMap : UserControl
 
             if (actionExpander.Content is StackPanel bindingsPanel)
             {
-                foreach (Grid bindingGrid in bindingsPanel.Children)
+                foreach (object child in bindingsPanel.Children)
                 {
-                    if (bindingGrid.Children[0] is ComboBox typeComboBox &&
-                        bindingGrid.Children[1] is TextBox keyTextBox)
+                    if (child is Grid bindingGrid)
                     {
-                        string type = typeComboBox.SelectedItem.ToString();
-                        string key = keyTextBox.Text;
-
-                        bindings.Add(new Dictionary<string, string>
+                        if (bindingGrid.Children[0] is ComboBox typeComboBox &&
+                            bindingGrid.Children[1] is TextBox keyTextBox)
                         {
-                            { "Type", type },
-                            { "KeyOrButton", key }
-                        });
+                            string type = typeComboBox.SelectedItem.ToString();
+                            string key = keyTextBox.Text;
+
+                            bindings.Add(new Dictionary<string, string>
+                            {
+                                { "Type", type },
+                                { "KeyOrButton", key }
+                            });
+                        }
                     }
                 }
             }
@@ -153,7 +156,6 @@ public partial class InputMap : UserControl
 
     private void DeleteAction_Click(object sender, RoutedEventArgs e)
     {
-        // Find the parent Expander of the clicked button
         if (sender is Button button && button.TemplatedParent is ToggleButton toggleButton)
         {
             // Traverse up to find the Expander
