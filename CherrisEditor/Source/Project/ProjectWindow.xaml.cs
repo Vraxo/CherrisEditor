@@ -12,5 +12,7 @@ public partial class ProjectWindow : Window
     private void ApplyButton_Click(object sender, RoutedEventArgs e)
     {
         GeneralTab.SaveConfig();
+        // Call SaveInputMap() on the InputMapTab instance
+        InputMapTab.SaveInputMap();
     }
 }

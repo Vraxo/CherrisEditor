@@ -14,7 +14,7 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TabControl Grid.Row="0">
+        <TabControl Grid.Row="0" BorderThickness="0">
             <TabControl.Template>
                 <ControlTemplate TargetType="{x:Type TabControl}">
                     <Grid>
@@ -40,7 +40,6 @@
                     </Grid>
                 </ControlTemplate>
             </TabControl.Template>
-
             <TabControl.Resources>
                 <Style TargetType="{x:Type TabItem}">
                     <Setter Property="Foreground" Value="LightGray"/>
@@ -73,9 +72,7 @@
                 <local:GeneralSettingsTab x:Name="GeneralTab" />
             </TabItem>
             <TabItem Header="Input Map">
-                <Grid Background="#1A1A1A">
-                    <!-- Content for Input Map tab goes here -->
-                </Grid>
+                <local:InputMap x:Name="InputMapTab" />
             </TabItem>
         </TabControl>
 
