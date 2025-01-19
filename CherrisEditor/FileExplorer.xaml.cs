@@ -1,5 +1,5 @@
-﻿using System.Diagnostics;
-using System.IO;
+﻿using System.IO;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -12,15 +12,14 @@ public partial class FileExplorer : UserControl
 {
     public string RootPath { get; set; } = "";
     public string currentPath = "";
-
     public event Action<string>? FileOpened;
 
-    private const string defaultIconPath = "D:\\Parsa Stuff\\Visual Studio\\CherrisEditor\\CherrisEditor\\bin\\Debug\\net8.0-windows\\Res\\Icons\\File.png";
-    private const string folderIconPath = "D:\\Parsa Stuff\\Visual Studio\\CherrisEditor\\CherrisEditor\\bin\\Debug\\net8.0-windows\\Res\\Icons\\Folder.png";
-    private const string fontIconPath = "D:\\Parsa Stuff\\Visual Studio\\CherrisEditor\\CherrisEditor\\bin\\Debug\\net8.0-windows\\Res\\Icons\\Font.png";
-    private const string audioIconPath = "D:\\Parsa Stuff\\Visual Studio\\CherrisEditor\\CherrisEditor\\bin\\Debug\\net8.0-windows\\Res\\Icons\\Audio.png";
-    private const string themeIconPath = "D:\\Parsa Stuff\\Visual Studio\\CherrisEditor\\CherrisEditor\\bin\\Debug\\net8.0-windows\\Res\\Icons\\Theme.png";
-    private const string sceneIconPath = "D:\\Parsa Stuff\\Visual Studio\\CherrisEditor\\CherrisEditor\\bin\\Debug\\net8.0-windows\\Res\\Icons\\Scene.png";
+    private const string folderIconPath = "Res/Icons/Folder.png";
+    private const string defaultIconPath = "Res/Icons/File.png";
+    private const string fontIconPath = "Res/Icons/Font.png";
+    private const string audioIconPath = "Res/Icons/Audio.png";
+    private const string themeIconPath = "Res/Icons/Theme.png";
+    private const string sceneIconPath = "Res/Icons/Scene.png";
 
     public FileExplorer()
     {
@@ -36,7 +35,10 @@ public partial class FileExplorer : UserControl
 
     public void Populate(string path)
     {
-        if (string.IsNullOrEmpty(path)) return;
+        if (string.IsNullOrEmpty(path))
+        {
+            return;
+        }
 
         FileExplorerItemsControl.Items.Clear();
         currentPath = path;
@@ -44,7 +46,7 @@ public partial class FileExplorer : UserControl
         try
         {
             AddBackButtonIfNotRoot();
-            AddDirectoriesToExplorer(path);
+            AddDirectories(path);
             AddFilesToExplorer(path);
         }
         catch (Exception ex)
@@ -62,7 +64,7 @@ public partial class FileExplorer : UserControl
         }
     }
 
-    private void AddDirectoriesToExplorer(string path)
+    private void AddDirectories(string path)
     {
         foreach (string dir in Directory.GetDirectories(path))
         {
@@ -160,7 +162,7 @@ public partial class FileExplorer : UserControl
         Image image = new()
         {
             Source = isDirectory
-                ? new BitmapImage(new(folderIconPath, UriKind.Absolute))
+                ? new BitmapImage(new(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, folderIconPath), UriKind.Absolute))
                 : GetImageSourceForFile(fullPath),
             Width = 48,
             Height = 48,
@@ -211,6 +213,8 @@ public partial class FileExplorer : UserControl
             _ => defaultIconPath,
         };
 
+        string fullIconPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, iconPath);
+
         string[] imageExtensions = { ".jpg", ".jpeg", ".png", ".bmp", ".gif", ".tiff", ".webp" };
 
         if (Array.Exists(imageExtensions, ext => ext.Equals(fileExtension)))
@@ -234,7 +238,7 @@ public partial class FileExplorer : UserControl
             }
         }
 
-        return new(new(iconPath, UriKind.RelativeOrAbsolute));
+        return new(new(fullIconPath, UriKind.RelativeOrAbsolute));
     }
 
     private Button CreateBackButton()
