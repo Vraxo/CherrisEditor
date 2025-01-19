@@ -12,7 +12,7 @@ namespace CherrisEditor;
 public partial class FileExplorer : UserControl
 {
     public string RootPath { get; set; } = "";
-    private string currentPath = "";
+    public string currentPath = "";
 
     public event Action<string>? FileOpened;
 

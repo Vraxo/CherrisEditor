@@ -16,6 +16,9 @@ public class ResourceControlGenerator
     private static readonly SolidColorBrush BackgroundColor = new(new() { R = 16, G = 16, B = 16, A = 255 });
     private static readonly SolidColorBrush ForegroundColor = new(Colors.LightGray);
 
+    // **Hardcoded root path for the File Explorer (you can change this)**
+    private static readonly string FileExplorerRootPath = "D:\\Parsa Stuff\\Visual Studio\\HordeRush\\HordeRush\\Res";
+
     public static FrameworkElement CreateResourceControl(Node node, PropertyInfo property, string fullPath, Dictionary<string, object?> nodePropertyValues)
     {
         string propertyName = fullPath != "" ? fullPath : property.Name;
@@ -121,15 +124,44 @@ public class ResourceControlGenerator
         {
             // Use the base Resource type to determine the filter
             Filter = GetFilterForResourceType(typeof(Resource)),
-            Title = $"Select a Resource for {propertyName}"
+            Title = $"Select a Resource for {propertyName}",
+            InitialDirectory = FileExplorerRootPath // Set initial directory
         };
 
         if (openFileDialog.ShowDialog() == true)
         {
             string filePath = openFileDialog.FileName;
-            textBox.Text = filePath;
-            SetStringValue(nodePropertyValues, propertyName, filePath);
+
+            // Check if the selected file is within the FileExplorerRootPath
+            if (filePath.StartsWith(FileExplorerRootPath, StringComparison.OrdinalIgnoreCase))
+            {
+                // Make the path relative to the "Res" folder
+                string relativePath = GetRelativePathFromRes(filePath);
+
+                textBox.Text = relativePath;
+                SetStringValue(nodePropertyValues, propertyName, relativePath);
+            }
+            else
+            {
+                // Optionally, display a message or clear the textbox if the file is not from the correct location
+                MessageBox.Show("Please select a file from the project's Res directory.", "Invalid File Location", MessageBoxButton.OK, MessageBoxImage.Warning);
+                textBox.Text = string.Empty; // Clear the textbox
+                SetStringValue(nodePropertyValues, propertyName, string.Empty); // Clear the value in nodePropertyValues
+            }
         }
+    }
+
+    // Helper method to get the path relative to the "Res" folder
+    private static string GetRelativePathFromRes(string fullPath)
+    {
+        // Assuming FileExplorerRootPath ends with "Res" or "Res\"
+        int resIndex = fullPath.IndexOf("\\Res\\", StringComparison.OrdinalIgnoreCase);
+        if (resIndex >= 0)
+        {
+            return fullPath.Substring(resIndex + 1); // +1 to include the leading slash
+        }
+
+        return fullPath; // Should not happen if the file is selected from the correct directory
     }
 
     private static string GetFilterForResourceType(Type resourceType)
