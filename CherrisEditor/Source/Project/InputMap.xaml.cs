@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
+using System.Windows.Media;
 using YamlDotNet.Serialization;
 
 namespace CherrisEditor;
@@ -97,6 +99,7 @@ public partial class InputMap : UserControl
         Expander actionExpander = new Expander();
         actionExpander.Header = new TextBlock { Text = actionName };
         actionExpander.IsExpanded = true;
+        actionExpander.Tag = actionName;
 
         StackPanel bindingsPanel = new StackPanel();
 
@@ -146,5 +149,35 @@ public partial class InputMap : UserControl
     {
         // Add a new action with a default name
         AddActionToUI("NewAction", new List<Dictionary<string, string>>());
+    }
+
+    private void DeleteAction_Click(object sender, RoutedEventArgs e)
+    {
+        // Find the parent Expander of the clicked button
+        if (sender is Button button && button.TemplatedParent is ToggleButton toggleButton)
+        {
+            // Traverse up to find the Expander
+            DependencyObject parent = toggleButton.TemplatedParent;
+            while (parent != null && !(parent is Expander))
+            {
+                parent = VisualTreeHelper.GetParent(parent);
+            }
+
+            Expander expander = parent as Expander;
+            if (expander != null && InputMapPanel.Children.Contains(expander))
+            {
+                // Get the action name from the Expander's Tag
+                string? actionName = expander.Tag as string;
+
+                // Remove the Expander from the UI
+                InputMapPanel.Children.Remove(expander);
+
+                // Remove the action from data if it exists
+                if (!string.IsNullOrEmpty(actionName) && inputMapData.ContainsKey(actionName))
+                {
+                    inputMapData.Remove(actionName);
+                }
+            }
+        }
     }
 }

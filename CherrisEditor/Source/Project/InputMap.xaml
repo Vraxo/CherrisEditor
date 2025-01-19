@@ -39,6 +39,7 @@
                                                     <Grid.ColumnDefinitions>
                                                         <ColumnDefinition Width="*" />
                                                         <ColumnDefinition Width="Auto" />
+                                                        <ColumnDefinition Width="Auto" />
                                                     </Grid.ColumnDefinitions>
                                                     <ContentPresenter Grid.Column="0"
                                                                       x:Name="ContentSite"
@@ -47,7 +48,14 @@
                                                                       ContentSource="Content"
                                                                       Margin="5,0,0,0"
                                                                       RecognizesAccessKey="True" />
-                                                    <Path Grid.Column="1"
+                                                    <Button Grid.Column="1" 
+                                                            Content="X" 
+                                                            Padding="5,0,5,0"
+                                                            Margin="5,0,0,0"
+                                                            VerticalAlignment="Center"
+                                                            Click="DeleteAction_Click" 
+                                                            Style="{DynamicResource AddBindingButtonStyle}" />
+                                                    <Path Grid.Column="2"
                                                           x:Name="Arrow"
                                                           Fill="{TemplateBinding Foreground}"
                                                           VerticalAlignment="Center"
