@@ -29,7 +29,7 @@ public static class PropertyControlFactory
             Type t when t == typeof(Vector2) => Vector2ControlGenerator.CreateVector2Control(node, property, fullPath, nodePropertyValues),
             Type t when t == typeof(Color) => ColorControlGenerator.CreateColorControl(node, property, fullPath, nodePropertyValues),
             Type t when t.IsEnum => EnumControlGenerator.CreateEnumControl(node, property, fullPath, nodePropertyValues),
-            Type t when t == typeof(Audio) || t == typeof(Font) || t == typeof(Texture) => ResourceControlGenerator.CreateResourceControl(node, property, fullPath, nodePropertyValues),
+            Type t when t.IsSubclassOf(typeof(Resource)) => ResourceControlGenerator.CreateResourceControl(node, property, fullPath, nodePropertyValues),
             _ => null
         };
     }
@@ -146,6 +146,6 @@ public static class PropertyControlFactory
 
     private static bool IsResourceType(Type type)
     {
-        return type == typeof(Audio) || type == typeof(Font) || type == typeof(Texture);
+        return type.IsSubclassOf(typeof(Resource));
     }
 }

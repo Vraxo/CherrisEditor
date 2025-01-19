@@ -5,7 +5,7 @@ using SDL2;
 
 namespace Cherris;
 
-public class Texture
+public class Texture : Resource
 {
     public Vector2 Size { get; private set; } = Vector2.Zero;
     private Texture2D raylibTexture;

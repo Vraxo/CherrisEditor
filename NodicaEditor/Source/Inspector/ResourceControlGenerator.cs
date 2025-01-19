@@ -1,8 +1,10 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using Cherris;
+using Microsoft.Win32;
 using Button = System.Windows.Controls.Button;
 using HorizontalAlignment = System.Windows.HorizontalAlignment;
 using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
@@ -117,7 +119,8 @@ public class ResourceControlGenerator
     {
         OpenFileDialog openFileDialog = new()
         {
-            Filter = GetFilterForResourceType(property.PropertyType),
+            // Use the base Resource type to determine the filter
+            Filter = GetFilterForResourceType(typeof(Resource)),
             Title = $"Select a Resource for {propertyName}"
         };
 
@@ -131,17 +134,10 @@ public class ResourceControlGenerator
 
     private static string GetFilterForResourceType(Type resourceType)
     {
-        if (resourceType == typeof(Audio))
+        // Now that we have a common Resource base type, we can simplify the filter
+        if (resourceType == typeof(Resource))
         {
-            return "Audio Files (*.wav;*.mp3;*.ogg)|*.wav;*.mp3;*.ogg|All files (*.*)|*.*";
-        }
-        else if (resourceType == typeof(Font))
-        {
-            return "Font Files (*.ttf;*.otf)|*.ttf;*.otf|All files (*.*)|*.*";
-        }
-        else if (resourceType == typeof(Texture))
-        {
-            return "Image Files (*.png;*.jpg;*.jpeg;*.bmp)|*.png;*.jpg;*.jpeg;*.bmp|All files (*.*)|*.*";
+            return "Resource Files (*.wav;*.mp3;*.ogg;*.ttf;*.otf;*.png;*.jpg;*.jpeg;*.bmp)|*.wav;*.mp3;*.ogg;*.ttf;*.otf;*.png;*.jpg;*.jpeg;*.bmp|All files (*.*)|*.*";
         }
         else
         {

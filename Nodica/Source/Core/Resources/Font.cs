@@ -5,7 +5,7 @@ using System.Buffers;
 
 namespace Cherris;
 
-public class Font
+public class Font : Resource
 {
     public string Name = "";
     public int Size = 0;

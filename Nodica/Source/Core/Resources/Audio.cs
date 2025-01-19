@@ -4,7 +4,7 @@ using SDL2;
 
 namespace Cherris;
 
-public class Audio
+public class Audio : Resource
 {
     public float Length { get; private set; } = 0.1f;
     private Music raylibAudio;

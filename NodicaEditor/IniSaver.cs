@@ -209,6 +209,6 @@ public class IniSaver
 
     private static bool IsResourceType(Type type)
     {
-        return type == typeof(Audio) || type == typeof(Font) || type == typeof(Texture);
+        return type.IsSubclassOf(typeof(Resource));
     }
 }
