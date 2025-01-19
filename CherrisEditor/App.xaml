@@ -4,6 +4,6 @@
              xmlns:local="clr-namespace:CherrisEditor"
              StartupUri="Source/MainWindow.xaml">
     <Application.Resources>
-         
+
     </Application.Resources>
 </Application>
