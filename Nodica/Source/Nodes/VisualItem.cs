@@ -1,6 +1,6 @@
-﻿using Nodica.RenderCommands;
+﻿using Cherris.RenderCommands;
 
-namespace Nodica;
+namespace Cherris;
 
 public abstract class VisualItem : Node
 {

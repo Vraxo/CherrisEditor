@@ -1,10 +1,10 @@
 ﻿using System.Reflection;
 using System.Windows.Media;
-using Nodica;
+using Cherris;
 using CheckBox = System.Windows.Controls.CheckBox;
 using VerticalAlignment = System.Windows.VerticalAlignment;
 
-namespace NodicaEditor;
+namespace CherrisEditor;
 
 public class BoolControlGenerator
 {

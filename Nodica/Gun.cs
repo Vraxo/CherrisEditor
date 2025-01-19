@@ -1,6 +1,6 @@
-﻿using Nodica;
+﻿using Cherris;
 
-namespace Nodica;
+namespace Cherris;
 
 public class Gun : Sprite
 {
@@ -32,7 +32,7 @@ public class Gun : Sprite
 
         FlipV = Input.MousePosition.X < GlobalPosition.X;
 
-        if (Input.IsActionDown("Fire") && Time.Elapsed - lastFiredTime >= cooldown)
+        if (Input.IsActionDown("Fire") && TimeManager.Elapsed - lastFiredTime >= cooldown)
         {
             Fire();
         }
@@ -59,7 +59,7 @@ public class Gun : Sprite
 
     private void Fire()
     {
-        lastFiredTime = Time.Elapsed;
+        lastFiredTime = TimeManager.Elapsed;
         PlayGunshotSound();
         FireRaycast();
     }

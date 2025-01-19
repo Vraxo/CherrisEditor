@@ -1,8 +1,8 @@
-﻿using Nodica.Backends;
+﻿using Cherris.Backends;
 
-namespace Nodica;
+namespace Cherris;
 
-public static class Time
+public static class TimeManager
 {
     private static Backend Backend => App.Instance.Backend;
 

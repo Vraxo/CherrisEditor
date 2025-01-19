@@ -3,9 +3,9 @@ using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using Nodica;
+using Cherris;
 
-namespace NodicaEditor;
+namespace CherrisEditor;
 
 public class StringControlGenerator
 {

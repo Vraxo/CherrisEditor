@@ -1,6 +1,6 @@
-﻿using Nodica;
+﻿using Cherris;
 
-namespace Nodica;
+namespace Cherris;
 
 public class Menu : Node
 {
@@ -32,7 +32,7 @@ public class Menu : Node
     {
         base.Update();
 
-        particleSpawnTimer += Time.Delta;
+        particleSpawnTimer += TimeManager.Delta;
         if (particleSpawnTimer >= ParticleSpawnInterval)
         {
             GenerateParticle();

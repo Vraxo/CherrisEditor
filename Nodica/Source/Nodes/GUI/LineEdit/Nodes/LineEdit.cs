@@ -1,7 +1,7 @@
 ﻿using Raylib_cs;
 using System.Collections.Generic;
 
-namespace Nodica;
+namespace Cherris;
 
 public partial class LineEdit : Button
 {

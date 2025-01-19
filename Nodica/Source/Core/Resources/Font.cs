@@ -1,9 +1,9 @@
 ﻿using SDL2;
 using Raylib_cs;
-using Nodica.Backends;
+using Cherris.Backends;
 using System.Buffers;
 
-namespace Nodica;
+namespace Cherris;
 
 public class Font
 {

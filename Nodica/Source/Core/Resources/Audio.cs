@@ -1,8 +1,8 @@
-﻿using Nodica.Backends;
+﻿using Cherris.Backends;
 using Raylib_cs;
 using SDL2;
 
-namespace Nodica;
+namespace Cherris;
 
 public class Audio
 {

@@ -1,4 +1,4 @@
-﻿namespace Nodica;
+﻿namespace Cherris;
 
 public class Timer : Node
 {
@@ -28,7 +28,7 @@ public class Timer : Node
 
         if (fired)
         {
-            TimePassed += Time.Delta;
+            TimePassed += TimeManager.Delta;
 
             if (TimePassed >= WaitTime)
             {

@@ -1,4 +1,4 @@
-﻿namespace Nodica;
+﻿namespace Cherris;
 
 public abstract class Collider : Node2D
 {

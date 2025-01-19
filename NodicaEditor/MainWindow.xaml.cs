@@ -3,9 +3,9 @@ using System.Text;
 using System.Windows;
 using System.Windows.Input;
 using Microsoft.Win32;
-using Nodica;
+using Cherris;
 
-namespace NodicaEditor;
+namespace CherrisEditor;
 
 public partial class MainWindow : Window
 {

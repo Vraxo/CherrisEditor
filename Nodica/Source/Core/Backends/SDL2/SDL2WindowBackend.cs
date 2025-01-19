@@ -1,6 +1,6 @@
 ﻿using SDL2;
 
-namespace Nodica.Backends;
+namespace Cherris.Backends;
 
 public sealed class SDL2WindowBackend : IWindowBackend
 {

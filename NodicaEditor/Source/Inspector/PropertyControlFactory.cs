@@ -4,14 +4,14 @@ using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using Nodica;
+using Cherris;
 using Button = System.Windows.Controls.Button;
 using Color = Raylib_cs.Color;
 using HorizontalAlignment = System.Windows.HorizontalAlignment;
 using TextBlock = System.Windows.Controls.TextBlock;
 using VerticalAlignment = System.Windows.VerticalAlignment;
 
-namespace NodicaEditor;
+namespace CherrisEditor;
 
 public static class PropertyControlFactory
 {
@@ -29,6 +29,7 @@ public static class PropertyControlFactory
             Type t when t == typeof(Vector2) => Vector2ControlGenerator.CreateVector2Control(node, property, fullPath, nodePropertyValues),
             Type t when t == typeof(Color) => ColorControlGenerator.CreateColorControl(node, property, fullPath, nodePropertyValues),
             Type t when t.IsEnum => EnumControlGenerator.CreateEnumControl(node, property, fullPath, nodePropertyValues),
+            Type t when t == typeof(Audio) || t == typeof(Font) || t == typeof(Texture) => ResourceControlGenerator.CreateResourceControl(node, property, fullPath, nodePropertyValues),
             _ => null
         };
     }
@@ -75,28 +76,46 @@ public static class PropertyControlFactory
             if (sender is Button button && button.Tag is ValueTuple<Node, PropertyInfo, string, FrameworkElement> tag)
             {
                 var (resetNode, resetProperty, resetPropertyName, associatedControl) = tag;
-                object? defaultValue = DefaultValueProvider.GetDefaultValue(resetProperty, resetNode, resetPropertyName);
-                SetPropertyValue(nodePropertyValues, resetPropertyName, defaultValue);
 
-                // Update the control based on its type
-                if (associatedControl is StackPanel panel)
+                // Check if the property is a resource type
+                if (IsResourceType(resetProperty.PropertyType))
                 {
-                    if (panel.Tag is string controlType)
+                    // For resource types, clear the value in the associated TextBox
+                    if (associatedControl is StackPanel resourcePanel)
                     {
-                        switch (controlType)
+                        if (resourcePanel.Children[0] is TextBox textBox)
                         {
-                            case "ColorControl":
-                                ColorControlGenerator.UpdateColorControl(panel, (Color?)defaultValue);
-                                break;
-                            case "Vector2Control":
-                                Vector2ControlGenerator.UpdateVector2Control(panel, (Vector2?)defaultValue);
-                                break;
+                            textBox.Text = string.Empty; // Clear the TextBox
+                            SetPropertyValue(nodePropertyValues, resetPropertyName, string.Empty); // Update the dictionary
                         }
                     }
                 }
                 else
                 {
-                    UpdateControlValue(associatedControl, defaultValue);
+                    // For non-resource types, use the default value logic
+                    object? defaultValue = DefaultValueProvider.GetDefaultValue(resetProperty, resetNode, resetPropertyName);
+                    SetPropertyValue(nodePropertyValues, resetPropertyName, defaultValue);
+
+                    // Update the control based on its type
+                    if (associatedControl is StackPanel panel)
+                    {
+                        if (panel.Tag is string controlType)
+                        {
+                            switch (controlType)
+                            {
+                                case "ColorControl":
+                                    ColorControlGenerator.UpdateColorControl(panel, (Color?)defaultValue);
+                                    break;
+                                case "Vector2Control":
+                                    Vector2ControlGenerator.UpdateVector2Control(panel, (Vector2?)defaultValue);
+                                    break;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        UpdateControlValue(associatedControl, defaultValue);
+                    }
                 }
             }
         };
@@ -123,5 +142,10 @@ public static class PropertyControlFactory
     private static void SetPropertyValue(Dictionary<string, object?> propertyValues, string propertyName, object? newValue)
     {
         propertyValues[propertyName] = newValue;
+    }
+
+    private static bool IsResourceType(Type type)
+    {
+        return type == typeof(Audio) || type == typeof(Font) || type == typeof(Texture);
     }
 }

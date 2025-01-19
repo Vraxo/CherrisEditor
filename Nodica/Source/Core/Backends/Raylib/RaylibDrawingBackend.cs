@@ -1,7 +1,7 @@
 ﻿using Raylib_cs;
 using SkiaSharp;
 
-namespace Nodica.Backends;
+namespace Cherris.Backends;
 
 public sealed class RaylibDrawingBackend : IDrawingBackend
 {
@@ -98,7 +98,7 @@ public sealed class RaylibDrawingBackend : IDrawingBackend
 
     // Text
 
-    public override void DrawText(string text, Vector2 position, Nodica.Font font, float fontSize, float spacing, Color color)
+    public override void DrawText(string text, Vector2 position, Cherris.Font font, float fontSize, float spacing, Color color)
     {
         Raylib.DrawTextEx(font, text, position, fontSize, spacing, color);
     }

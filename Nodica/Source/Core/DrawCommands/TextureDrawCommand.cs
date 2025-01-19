@@ -1,4 +1,4 @@
-﻿namespace Nodica.RenderCommands;
+﻿namespace Cherris.RenderCommands;
 
 public class TextureDrawCommand : DrawCommand
 {

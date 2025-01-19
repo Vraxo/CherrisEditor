@@ -1,6 +1,6 @@
-﻿using Nodica.Backends;
+﻿using Cherris.Backends;
 
-namespace Nodica;
+namespace Cherris;
 
 public static class WindowManager
 {

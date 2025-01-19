@@ -1,7 +1,7 @@
 ﻿using IniParser;
 using IniParser.Model;
 
-namespace Nodica;
+namespace Cherris;
 
 public sealed class PackedSceneIni(string path)
 {

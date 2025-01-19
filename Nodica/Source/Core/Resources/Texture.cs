@@ -1,9 +1,9 @@
 ﻿using Raylib_cs;
 using SixLabors.ImageSharp;
-using Nodica.Backends;
+using Cherris.Backends;
 using SDL2;
 
-namespace Nodica;
+namespace Cherris;
 
 public class Texture
 {
@@ -53,12 +53,12 @@ public class Texture
 
     private static string GetPngPath(string imagePath)
     {
-        if (!Directory.Exists("Res/Nodica/Temporary"))
+        if (!Directory.Exists("Res/Cherris/Temporary"))
         {
             Directory.CreateDirectory("Res/Temporary");
         }
 
-        string pngPath = $"Res/Nodica/Temporary/{Path.GetFileNameWithoutExtension(imagePath)}.png";
+        string pngPath = $"Res/Cherris/Temporary/{Path.GetFileNameWithoutExtension(imagePath)}.png";
 
         if (!File.Exists(pngPath))
         {

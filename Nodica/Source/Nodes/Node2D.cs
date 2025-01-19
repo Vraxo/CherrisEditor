@@ -1,4 +1,4 @@
-﻿namespace Nodica;
+﻿namespace Cherris;
 
 public class Node2D : VisualItem
 {

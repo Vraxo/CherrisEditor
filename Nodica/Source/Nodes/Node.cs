@@ -1,6 +1,6 @@
 ﻿using Spectre.Console;
 
-namespace Nodica;
+namespace Cherris;
 
 /// <summary>
 /// Represents a basic node in a scene tree with support for children, activation, and destruction.

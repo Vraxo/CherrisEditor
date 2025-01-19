@@ -1,4 +1,4 @@
-﻿namespace Nodica.Backends;
+﻿namespace Cherris.Backends;
 
 public sealed class RaylibBackend : Backend
 {

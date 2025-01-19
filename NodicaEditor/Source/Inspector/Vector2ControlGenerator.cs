@@ -3,11 +3,11 @@ using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using Nodica;
+using Cherris;
 using TextBlock = System.Windows.Controls.TextBlock;
 using VerticalAlignment = System.Windows.VerticalAlignment;
 
-namespace NodicaEditor;
+namespace CherrisEditor;
 
 public class Vector2ControlGenerator
 {

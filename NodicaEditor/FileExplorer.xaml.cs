@@ -7,7 +7,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
-namespace NodicaEditor;
+namespace CherrisEditor;
 
 public partial class FileExplorer : UserControl
 {
@@ -152,7 +152,7 @@ public partial class FileExplorer : UserControl
         Image image = new()
         {
             Source = isDirectory
-                ? new BitmapImage(new Uri("D:\\Parsa Stuff\\Visual Studio\\NodicaEditor\\NodicaEditor\\bin\\Debug\\net8.0-windows\\Res\\Icons\\Folder.png", UriKind.RelativeOrAbsolute))
+                ? new BitmapImage(new Uri("D:\\Parsa Stuff\\Visual Studio\\CherrisEditor\\CherrisEditor\\bin\\Debug\\net8.0-windows\\Res\\Icons\\Folder.png", UriKind.RelativeOrAbsolute))
                 : GetImageSourceForFile(fullPath),
             Width = 48,
             Height = 48,
@@ -208,17 +208,17 @@ public partial class FileExplorer : UserControl
                 else
                 {
                     Debug.WriteLine($"File does not exist: {filePath}");
-                    return new BitmapImage(new Uri("D:\\Parsa Stuff\\Visual Studio\\NodicaEditor\\NodicaEditor\\bin\\Debug\\net8.0-windows\\Res\\Icons\\File.png", UriKind.RelativeOrAbsolute)); // fallback icon
+                    return new BitmapImage(new Uri("D:\\Parsa Stuff\\Visual Studio\\CherrisEditor\\CherrisEditor\\bin\\Debug\\net8.0-windows\\Res\\Icons\\File.png", UriKind.RelativeOrAbsolute)); // fallback icon
                 }
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"Error loading image: {ex.Message}");
-                return new BitmapImage(new Uri("D:\\Parsa Stuff\\Visual Studio\\NodicaEditor\\NodicaEditor\\bin\\Debug\\net8.0-windows\\Res\\Icons\\File.png", UriKind.RelativeOrAbsolute));
+                return new BitmapImage(new Uri("D:\\Parsa Stuff\\Visual Studio\\CherrisEditor\\CherrisEditor\\bin\\Debug\\net8.0-windows\\Res\\Icons\\File.png", UriKind.RelativeOrAbsolute));
             }
         }
 
-        return new BitmapImage(new Uri("D:\\Parsa Stuff\\Visual Studio\\NodicaEditor\\NodicaEditor\\bin\\Debug\\net8.0-windows\\Res\\Icons\\File.png", UriKind.RelativeOrAbsolute));
+        return new BitmapImage(new Uri("D:\\Parsa Stuff\\Visual Studio\\CherrisEditor\\CherrisEditor\\bin\\Debug\\net8.0-windows\\Res\\Icons\\File.png", UriKind.RelativeOrAbsolute));
     }
 
     private Button CreateBackButton()

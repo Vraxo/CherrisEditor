@@ -1,6 +1,6 @@
 ﻿using Raylib_cs;
 
-namespace Nodica;
+namespace Cherris;
 
 public abstract class ClickableCircle : Clickable
 {

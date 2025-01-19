@@ -1,7 +1,7 @@
 ﻿using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
-namespace Nodica;
+namespace Cherris;
 
 public sealed class Input
 {
@@ -9,7 +9,7 @@ public sealed class Input
     public static Input Instance => _instance ??= new();
 
     private readonly Dictionary<string, List<InputAction>> actionKeyMap = [];
-    private readonly string mappingsFilePath = "Res/Nodica/InputMappings.yaml";
+    private readonly string mappingsFilePath = "Res/Cherris/InputMappings.yaml";
 
     public static MouseCursorCode Cursor
     {

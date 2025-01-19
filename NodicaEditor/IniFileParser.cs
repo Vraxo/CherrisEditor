@@ -1,9 +1,9 @@
 ﻿
 using IniParser.Model;
 using IniParser;
-using Nodica;
+using Cherris;
 
-namespace NodicaEditor;
+namespace CherrisEditor;
 
 public class IniFileParser
 {

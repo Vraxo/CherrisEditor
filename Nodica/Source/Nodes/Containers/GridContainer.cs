@@ -1,6 +1,6 @@
 ﻿using Raylib_cs;
 
-namespace Nodica;
+namespace Cherris;
 
 public class GridContainer : Node2D
 {

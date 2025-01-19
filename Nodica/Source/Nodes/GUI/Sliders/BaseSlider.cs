@@ -1,4 +1,4 @@
-﻿namespace Nodica;
+﻿namespace Cherris;
 
 public abstract partial class BaseSlider : ClickableRectangle
 {

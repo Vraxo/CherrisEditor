@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 
-namespace Nodica;
+namespace Cherris;
 
 public static class PropertyLoader
 {

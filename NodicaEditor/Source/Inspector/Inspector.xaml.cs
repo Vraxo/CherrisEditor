@@ -3,21 +3,21 @@ using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using Nodica;
+using Cherris;
 using Button = System.Windows.Controls.Button;
 using HorizontalAlignment = System.Windows.HorizontalAlignment;
 using TextBlock = System.Windows.Controls.TextBlock;
 using VerticalAlignment = System.Windows.VerticalAlignment;
 
-namespace NodicaEditor;
+namespace CherrisEditor;
 
 public partial class Inspector : UserControl
 {
     private readonly StackPanel panel;
-    private readonly Dictionary<Node, Dictionary<string, object?>> nodePropertyValues = new();
+    private readonly Dictionary<Node, Dictionary<string, object?>> nodePropertyValues = [];
     private static readonly SolidColorBrush ForegroundColor = new(Colors.LightGray);
     private static readonly SolidColorBrush SeparatorColor = new(Colors.Gray);
-    private readonly Dictionary<string, Expander> expanderMap = new();
+    private readonly Dictionary<string, Expander> expanderMap = [];
 
     public Inspector()
     {

@@ -1,4 +1,4 @@
-﻿namespace Nodica;
+﻿namespace Cherris;
 
 public class Configuration
 {
@@ -8,7 +8,7 @@ public class Configuration
     public int MinHeight { get; set; } = 0;
     public int MaxWidth { get; set; } = 0;
     public int MaxHeight { get; set; } = 0;
-    public string Title { get; set; } = "Nodica";
+    public string Title { get; set; } = "Cherris";
     public bool ResizableWindow { get; set; } = true;
     public bool AntiAliasing { get; set; } = true;
     public string MainScenePath { get; set; } = "";

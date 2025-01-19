@@ -4,7 +4,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
 
-namespace Nodica
+namespace Cherris
 {
     public class PersianText : Node2D, IDisposable
     {

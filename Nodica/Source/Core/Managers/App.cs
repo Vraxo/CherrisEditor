@@ -1,8 +1,8 @@
 ﻿using System.Reflection;
 using YamlDotNet.Serialization;
-using Nodica.Backends;
+using Cherris.Backends;
 
-namespace Nodica;
+namespace Cherris;
 
 public sealed class App
 {
@@ -103,7 +103,7 @@ public sealed class App
 
     private static void ProcessManagers()
     {
-        Time.Process();
+        TimeManager.Process();
         ClickManager.Instance.Process();
         CollisionManager.Instance.Process();
         RenderManager.Instance.Process();
@@ -134,6 +134,7 @@ public sealed class App
     private static Configuration LoadConfig(string filePath)
     {
         var deserializer = new DeserializerBuilder().Build();
-        return deserializer.Deserialize<Configuration>(System.IO.File.ReadAllText(filePath));
+        string yaml = File.ReadAllText(filePath);
+        return deserializer.Deserialize<Configuration>(yaml);
     }
 }

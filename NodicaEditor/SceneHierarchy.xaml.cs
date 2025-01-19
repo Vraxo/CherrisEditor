@@ -3,9 +3,9 @@ using System.ComponentModel;
 using System.Windows.Controls;
 using IniParser;
 using IniParser.Model;
-using Nodica;
+using Cherris;
 
-namespace NodicaEditor
+namespace CherrisEditor
 {
     public partial class SceneHierarchy : UserControl
     {

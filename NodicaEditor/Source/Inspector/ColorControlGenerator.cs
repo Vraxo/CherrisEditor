@@ -1,11 +1,11 @@
 ﻿using System.Reflection;
 using System.Windows.Controls;
 using System.Windows.Media;
-using Nodica;
+using Cherris;
 using Color = Raylib_cs.Color;
 using VerticalAlignment = System.Windows.VerticalAlignment;
 
-namespace NodicaEditor;
+namespace CherrisEditor;
 
 public class ColorControlGenerator
 {

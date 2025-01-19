@@ -1,7 +1,7 @@
 ﻿using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
-namespace Nodica;
+namespace Cherris;
 
 public sealed class PackedSceneYaml(string path)
 {

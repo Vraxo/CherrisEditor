@@ -3,9 +3,9 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Media;
-using Nodica;
+using Cherris;
 
-namespace NodicaEditor;
+namespace CherrisEditor;
 
 public class EnumControlGenerator
 {

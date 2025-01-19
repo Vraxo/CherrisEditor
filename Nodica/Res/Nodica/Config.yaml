@@ -4,7 +4,7 @@ MinWidth: 1280
 MinHeight: 720
 MaxWidth: -1
 MaxHeight: -1
-Title: Cosmocrushers
+Title: Cosmocrush
 ResizableWindow: true
 AntiAliasing: true
 MainScenePath: ''

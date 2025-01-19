@@ -1,4 +1,4 @@
-﻿namespace Nodica;
+﻿namespace Cherris;
 
 [AttributeUsage(AttributeTargets.Property)]
 public class InspectorExcludeAttribute : Attribute

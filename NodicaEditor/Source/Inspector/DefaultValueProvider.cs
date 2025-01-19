@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Numerics;
 using System.Reflection;
-using Nodica;
+using Cherris;
 using Color = Raylib_cs.Color;
 
-namespace NodicaEditor;
+namespace CherrisEditor;
 
 public class DefaultValueProvider
 {

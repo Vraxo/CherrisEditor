@@ -1,6 +1,6 @@
 ﻿using Raylib_cs;
 
-namespace Nodica.Backends;
+namespace Cherris.Backends;
 
 public sealed class RaylibWindowBackend : IWindowBackend
 {

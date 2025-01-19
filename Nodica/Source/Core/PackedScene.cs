@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 
-namespace Nodica;
+namespace Cherris;
 
 public class PackedScene
 {

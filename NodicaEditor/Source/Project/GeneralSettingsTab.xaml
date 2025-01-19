@@ -1,0 +1,75 @@
+<UserControl x:Class="CherrisEditor.GeneralSettingsTab"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:CherrisEditor"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800"
+             Loaded="UserControl_Loaded">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <Grid Background="#1A1A1A" x:Name="GeneralSettingsGrid">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <!-- Title -->
+            <Label Grid.Row="0" Grid.Column="0" Content="Title:" Foreground="LightGray" VerticalAlignment="Center" Margin="10,5,5,5"/>
+            <TextBox x:Name="TitleTextBox" Grid.Row="0" Grid.Column="1" Foreground="LightGray" Background="#2A2A2A" BorderBrush="#3C3C3C" VerticalAlignment="Center" Margin="5" />
+
+            <!-- Width -->
+            <Label Grid.Row="1" Grid.Column="0" Content="Width:" Foreground="LightGray" VerticalAlignment="Center" Margin="10,5,5,5"/>
+            <TextBox x:Name="WidthTextBox" Grid.Row="1" Grid.Column="1" Foreground="LightGray" Background="#2A2A2A" BorderBrush="#3C3C3C" VerticalAlignment="Center" Margin="5" />
+
+            <!-- Height -->
+            <Label Grid.Row="2" Grid.Column="0" Content="Height:" Foreground="LightGray" VerticalAlignment="Center" Margin="10,5,5,5"/>
+            <TextBox x:Name="HeightTextBox" Grid.Row="2" Grid.Column="1" Foreground="LightGray" Background="#2A2A2A" BorderBrush="#3C3C3C" VerticalAlignment="Center" Margin="5" />
+
+            <!-- MinWidth -->
+            <Label Grid.Row="3" Grid.Column="0" Content="Min Width:" Foreground="LightGray" VerticalAlignment="Center" Margin="10,5,5,5"/>
+            <TextBox x:Name="MinWidthTextBox" Grid.Row="3" Grid.Column="1" Foreground="LightGray" Background="#2A2A2A" BorderBrush="#3C3C3C" VerticalAlignment="Center" Margin="5" />
+
+            <!-- MinHeight -->
+            <Label Grid.Row="4" Grid.Column="0" Content="Min Height:" Foreground="LightGray" VerticalAlignment="Center" Margin="10,5,5,5"/>
+            <TextBox x:Name="MinHeightTextBox" Grid.Row="4" Grid.Column="1" Foreground="LightGray" Background="#2A2A2A" BorderBrush="#3C3C3C" VerticalAlignment="Center" Margin="5" />
+
+            <!-- MaxWidth -->
+            <Label Grid.Row="5" Grid.Column="0" Content="Max Width:" Foreground="LightGray" VerticalAlignment="Center" Margin="10,5,5,5"/>
+            <TextBox x:Name="MaxWidthTextBox" Grid.Row="5" Grid.Column="1" Foreground="LightGray" Background="#2A2A2A" BorderBrush="#3C3C3C" VerticalAlignment="Center" Margin="5" />
+
+            <!-- MaxHeight -->
+            <Label Grid.Row="6" Grid.Column="0" Content="Max Height:" Foreground="LightGray" VerticalAlignment="Center" Margin="10,5,5,5"/>
+            <TextBox x:Name="MaxHeightTextBox" Grid.Row="6" Grid.Column="1" Foreground="LightGray" Background="#2A2A2A" BorderBrush="#3C3C3C" VerticalAlignment="Center" Margin="5" />
+
+            <!-- ResizableWindow -->
+            <Label Grid.Row="7" Grid.Column="0" Content="Resizable Window:" Foreground="LightGray" VerticalAlignment="Center" Margin="10,5,5,5"/>
+            <CheckBox x:Name="ResizableWindowCheckBox" Grid.Row="7" Grid.Column="1" VerticalAlignment="Center" Margin="5" />
+
+            <!-- AntiAliasing -->
+            <Label Grid.Row="8" Grid.Column="0" Content="Anti-Aliasing:" Foreground="LightGray" VerticalAlignment="Center" Margin="10,5,5,5"/>
+            <CheckBox x:Name="AntiAliasingCheckBox" Grid.Row="8" Grid.Column="1" VerticalAlignment="Center" Margin="5" />
+
+            <!-- Backend -->
+            <Label Grid.Row="9" Grid.Column="0" Content="Backend:" Foreground="LightGray" VerticalAlignment="Center" Margin="10,5,5,5"/>
+            <TextBox x:Name="BackendTextBox" Grid.Row="9" Grid.Column="1" Foreground="LightGray" Background="#2A2A2A" BorderBrush="#3C3C3C" VerticalAlignment="Center" Margin="5" />
+
+            <!-- MainScenePath -->
+            <Label Grid.Row="10" Grid.Column="0" Content="Main Scene Path:" Foreground="LightGray" VerticalAlignment="Center" Margin="10,5,5,5"/>
+            <TextBox x:Name="MainScenePathTextBox" Grid.Row="10" Grid.Column="1" Foreground="LightGray" Background="#2A2A2A" BorderBrush="#3C3C3C" VerticalAlignment="Center" Margin="5" />
+        </Grid>
+    </ScrollViewer>
+</UserControl>
