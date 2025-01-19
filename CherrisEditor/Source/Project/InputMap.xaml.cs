@@ -4,6 +4,7 @@ using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using System.Windows.Input;
 using System.Windows.Media;
 using YamlDotNet.Serialization;
 
@@ -68,7 +69,7 @@ public partial class InputMap : UserControl
 
         foreach (Expander actionExpander in InputMapPanel.Children)
         {
-            string actionName = ((TextBlock)actionExpander.Header).Text;
+            string actionName = actionExpander.Header.ToString(); // The header is now a string
             List<Dictionary<string, string>> bindings = new List<Dictionary<string, string>>();
 
             if (actionExpander.Content is StackPanel bindingsPanel)
@@ -100,9 +101,8 @@ public partial class InputMap : UserControl
     private void AddActionToUI(string actionName, List<Dictionary<string, string>> bindings)
     {
         Expander actionExpander = new Expander();
-        actionExpander.Header = new TextBlock { Text = actionName };
+        actionExpander.Header = actionName; // Set header directly
         actionExpander.IsExpanded = true;
-        actionExpander.Tag = actionName;
 
         StackPanel bindingsPanel = new StackPanel();
 
@@ -168,8 +168,8 @@ public partial class InputMap : UserControl
             Expander expander = parent as Expander;
             if (expander != null && InputMapPanel.Children.Contains(expander))
             {
-                // Get the action name from the Expander's Tag
-                string? actionName = expander.Tag as string;
+                // Get the action name from the Expander's Header
+                string actionName = expander.Header.ToString();
 
                 // Remove the Expander from the UI
                 InputMapPanel.Children.Remove(expander);
@@ -180,6 +180,32 @@ public partial class InputMap : UserControl
                     inputMapData.Remove(actionName);
                 }
             }
+        }
+    }
+
+    private void HeaderTextBox_LostFocus(object sender, RoutedEventArgs e)
+    {
+        if (sender is TextBox textBox)
+        {
+            // Update the inputMapData when the header text is changed
+            UpdateInputMapDataFromUI();
+        }
+    }
+
+    private void HeaderTextBox_KeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Enter && sender is TextBox textBox)
+        {
+            // Remove focus from the TextBox when Enter is pressed
+            Keyboard.ClearFocus();
+
+            // Optionally, you can expand the current Expander here if needed
+            if (textBox.TemplatedParent is ToggleButton toggleButton && toggleButton.TemplatedParent is Expander expander)
+            {
+                expander.IsExpanded = true;
+            }
+
+            e.Handled = true; // Prevent further handling of the Enter key
         }
     }
 }
